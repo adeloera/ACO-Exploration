@@ -14,10 +14,15 @@ library(sf)
 library(fs)
 library(readxl)
 library(tidyverse)
+library(gganimate)
 
 ```
 
-```{r importation, echo = FALSE, warning = FALSE}
+##Data: 
+In the code I import, clean, and manipulate the data on Accountable Care Organization (ACO) beneficiaries at the county level. The data here comes from the Center for Medicare and Medicaid Services. There are four datasets available, one for each year from 2014 to 2017, where the unit of observation is a unique ACO-county combination. I use these four files, and a US county map shapefile from the Census Bureau, to create a dataset where the unit of observation is a county year with data on the ACO beneficiary population for each county in the continental united states and each year from 2014 to 2017. 
+
+
+```{r importation, echo = FALSE, message = FALSE ,warning = FALSE}
 #This code chunk imports the some of the data I will be using. 
 #First off is the data on the beneficiaries assigned to Medicare Shared Savings Program (MSSP) Acountable care Organizations (ACOs). 
   #The unit of observation is the ACO-county: each entry is data on an ACO's beneficiary population in a certain county. This data can be collapsed to either the ACO level or the county level, depending on project needs.
@@ -111,7 +116,7 @@ county_map <- read_sf("cb_2016_us_county_500k.shp") %>%
 ```
 
 
-```{r manipulation, echo = FALSE, warning = FALSE}
+```{r manipulation, echo = FALSE, message = FALSE, warning = FALSE}
 #I begin by collapsing each of the ACO-county level datasets to the county level. 
 #For now I just want the raw number of ACO beneficiaries in each county
 
@@ -214,8 +219,77 @@ master <- rbind(temp_2017, temp_2016, temp_2015, temp_2014)
 
 ```
 
-```{r visualization, echo = FALSE, cache = TRUE}
 
+##Visual
+I hope to eventually present an animation showing the ACO beneficiary population by county over the four year window of the data. For now I have four static maps, one for each year. 
+```{r static_visuals, echo = FALSE, message = FALSE, cache = TRUE}
+master %>%
+  filter(year == 2014) %>%
+  ggplot(aes(fill = aco_benes)) +
+  geom_sf() +
+  labs(title = "Medicare Shared Savings Program assigned beneficiaries by county",
+       subtitle = "Beneficiary population in 2014",
+       caption = "Data from the Center for Medicare and Medicaid Services") +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())
+
+master %>%
+  filter(year == 2015) %>%
+  ggplot(aes(fill = aco_benes)) +
+  geom_sf() +
+  labs(title = "Medicare Shared Savings Program assigned beneficiaries by county",
+       subtitle = "Beneficiary population in 2015",
+       caption = "Data from the Center for Medicare and Medicaid Services") +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())
+
+master %>%
+  filter(year == 2016) %>%
+  ggplot(aes(fill = aco_benes)) +
+  geom_sf() +
+  labs(title = "Medicare Shared Savings Program assigned beneficiaries by county",
+       subtitle = "Beneficiary population in 2016",
+       caption = "Data from the Center for Medicare and Medicaid Services") +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())
+  
+master %>%
+  filter(year == 2017) %>%
+  ggplot(aes(fill = aco_benes)) +
+  geom_sf() +
+  labs(title = "Medicare Shared Savings Program assigned beneficiaries by county",
+       subtitle = "Beneficiary population in 2017",
+       caption = "Data from the Center for Medicare and Medicaid Services") +
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks.y=element_blank())
+
+```
+
+```{r dynamic_visual, echo = FALSE, cache = TRUE}
+#I will now create an animation showing the change in the ACO beneficiary population at the county level over four years. 
+#That begins with the dataset I made above. 
+
+
+#master %>%
+#  ggplot(aes(fill = aco_benes, frame = year)) +
+#  geom_sf() +
+#  transition_states(year) 
 
 
 ```
