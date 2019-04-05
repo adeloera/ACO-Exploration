@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 #I begin as always by loading in the libraries I will use. 
 library(janitor)
 library(sf)
+library(fs)
 library(tidyverse)
 
 ```
@@ -77,17 +78,18 @@ aco_county_benes_2014 <- read_csv("ACO.SSP.COUNTY.ASSIGNED.PUF.2014.csv") %>%
 
 
 #Now I import a US map shapefile to be able to do mapping
+
 #This comes from the census bureau, which makes map files of the US like the one I will use publicly available.
 #I start by downloading a zip file with several file versions of a US county level map.
-download.file(url = "https://www2.census.gov/geo/tiger/GENZ2016/shp/cb_2016_us_division_5m.zip",
+download.file(url = "https://www2.census.gov/geo/tiger/GENZ2016/shp/cb_2016_us_county_500k.zip",
               dest = "county_shapefile.zip",
               mode = "wb")
 #I untar the zip file.
 untar("county_shapefile.zip")
 #And finally I save the shapefile I want as an r object. 
-county_map <- read_sf("cb_2016_us_county_5m.shp")
-
+county_map <- read_sf("cb_2016_us_county_500k.shp")
 ```
+
 
 ```{r manipulation, echo = FALSE }
 
