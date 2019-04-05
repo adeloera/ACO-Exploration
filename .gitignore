@@ -4,3 +4,10 @@
 .Ruserdata
 
 *.Rproj
+*.zip
+Dictionary.*
+*.cpg
+*.dbf
+*.prj
+*.xml
+*.shx
