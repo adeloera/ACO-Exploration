@@ -220,7 +220,7 @@ master <- rbind(temp_2017, temp_2016, temp_2015, temp_2014)
 ```
 
 
-##Visual
+##Visual: 
 I hope to eventually present an animation showing the ACO beneficiary population by county over the four year window of the data. For now I have four static maps, one for each year. 
 ```{r static_visuals, echo = FALSE, message = FALSE, cache = TRUE}
 master %>%
