@@ -10,12 +10,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 #I begin as always by loading in the libraries I will use. 
 library(janitor)
-
+library(sf)
 library(tidyverse)
 
 ```
 
-```{r, echo = FALSE, warning = FALSE}
+```{r importation, echo = FALSE, warning = FALSE}
 #This code chunk imports the some of the data I will be using. 
 #First off is the data on the beneficiaries assigned to Medicare Shared Savings Program (MSSP) Acountable care Organizations (ACOs). 
   #The unit of observation is the ACO-county: each entry is data on an ACO's beneficiary population in a certain county. This data can be collapsed to either the ACO level or the county level, depending on project needs.
@@ -77,14 +77,24 @@ aco_county_benes_2014 <- read_csv("ACO.SSP.COUNTY.ASSIGNED.PUF.2014.csv") %>%
 
 
 #Now I import a US map shapefile to be able to do mapping
-download.file(url = "https://www2.census.gov/geo/tiger/GENZ2016/shp/cb_2016_us_county_5m.zip",
+#This comes from the census bureau, which makes map files of the US like the one I will use publicly available.
+#I start by downloading a zip file with several file versions of a US county level map.
+download.file(url = "https://www2.census.gov/geo/tiger/GENZ2016/shp/cb_2016_us_division_5m.zip",
               dest = "county_shapefile.zip",
               mode = "wb")
+#I untar the zip file.
 untar("county_shapefile.zip")
-
-county_map <- cb_2016_us_county_5m.shp
+#And finally I save the shapefile I want as an r object. 
+county_map <- read_sf("cb_2016_us_county_5m.shp")
 
 ```
 
+```{r manipulation, echo = FALSE }
+
+```
+
+```{r visualization}
+
+```
 
 
