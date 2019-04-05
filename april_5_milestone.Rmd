@@ -15,7 +15,7 @@ library(tidyverse)
 
 ```
 
-```{r}
+```{r, echo = FALSE, warning = FALSE}
 #This code chunk imports the some of the data I will be using. 
 #First off is the data on the beneficiaries assigned to Medicare Shared Savings Program (MSSP) Acountable care Organizations (ACOs). 
   #The unit of observation is the ACO-county: each entry is data on an ACO's beneficiary population in a certain county. This data can be collapsed to either the ACO level or the county level, depending on project needs.
@@ -40,5 +40,51 @@ aco_county_benes_2017 <- read_csv("ACO.SSP.COUNTY.ASSIGNED.PUF.2017.csv") %>%
          total_benes = replace_na(total_benes, 0)) %>%
     #Finally I select just the variables I will want later.
   select(year, aco_id, state_name, county_name, state_id, county_id, total_benes)
+
+#I repeat the same process for 2015: 
+  #First I download the zip file directly from the CMS website.
+download.file(url = "https://www.cms.gov/Research-Statistics-Data-and-Systems/Downloadable-Public-Use-Files/SSPACO/Downloads/ACOSSPCOUNTYASSIGNEDPUF2015.zip",
+              dest = "aco_county_2015puf.zip",
+              mode = "wb")
+  #Second I untar the zip file to get the dictionary and spreadsheet available in my workspace.
+untar("aco_county_2015puf.zip")
+  #Third I read the csv file into an r object, which for now I keep roughly in the original format.
+aco_county_benes_2015 <- read_csv("ACO.SSP.COUNTY.ASSIGNED.PUF.2015.csv") %>%
+    #I call clean names for ease of use
+  clean_names() %>%
+    #I create a numeric total beneficiaries variable.
+  mutate(total_benes = as.numeric(tot_ab),
+         total_benes = replace_na(total_benes, 0)) %>%
+    #Finally I select just the variables I will want later.
+  select(year, aco_id, state_name, county_name, state_id, county_id, total_benes)
+
+#I now repeat the process one last time for 2014: 
+  #First I download the zip file directly from the CMS website.
+download.file(url = "https://www.cms.gov/Research-Statistics-Data-and-Systems/Downloadable-Public-Use-Files/SSPACO/Downloads/ACOSSPCOUNTYASSIGNEDPUF2014.zip",
+              dest = "aco_county_2014puf.zip",
+              mode = "wb")
+  #Second I untar the zip file to get the dictionary and spreadsheet available in my workspace.
+untar("aco_county_2014puf.zip")
+  #Third I read the csv file into an r object, which for now I keep roughly in the original format.
+aco_county_benes_2014 <- read_csv("ACO.SSP.COUNTY.ASSIGNED.PUF.2014.csv") %>%
+    #I call clean names for ease of use
+  clean_names() %>%
+    #I create a numeric total beneficiaries variable.
+  mutate(total_benes = as.numeric(tot_ab),
+         total_benes = replace_na(total_benes, 0)) %>%
+    #Finally I select just the variables I will want later.
+  select(year, aco_id, state_name, county_name, state_id, county_id, total_benes)
+
+
+#Now I import a US map shapefile to be able to do mapping
+download.file(url = "https://www2.census.gov/geo/tiger/GENZ2016/shp/cb_2016_us_county_5m.zip",
+              dest = "county_shapefile.zip",
+              mode = "wb")
+untar("county_shapefile.zip")
+
+county_map <- cb_2016_us_county_5m.shp
+
 ```
+
+
 
