@@ -287,9 +287,18 @@ master %>%
 
 
 #master %>%
-#  ggplot(aes(fill = aco_benes, frame = year)) +
+#  ggplot(aes(fill = aco_benes)) +
 #  geom_sf() +
 #  transition_states(year) 
+
+
+```
+
+```{r write}
+
+#Here I write my master file into an rds file to be used elsewhere.
+
+write_csv(master, "ACO_exploration/master_file.csv")
 
 
 ```
