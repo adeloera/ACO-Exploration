@@ -1,0 +1,12 @@
+name: ACO_Exploration
+title: ACO_Exploration
+username:
+account: andres-deloera
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 872645
+bundleId: 2023821
+url: https://andres-deloera.shinyapps.io/ACO_Exploration/
+when: 1555691959.27797
+asMultiple: FALSE
+asStatic: FALSE
