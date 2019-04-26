@@ -8,6 +8,7 @@
 #
 
 library(shiny)
+library(sf)
 library(readr)
 library(tidyverse)
 library(ggthemes)
@@ -26,28 +27,85 @@ ui <- fluidPage(
    # Application title
    titlePanel("Exploring ACO Participation"),
    
-   # Sidebar with a slider input for number of bins 
+   # Sidebar with an input selecter to select the year. 
    sidebarLayout(
       sidebarPanel(
+        
         selectInput("year",
                     "Select Program Year",
                     choices = c(2014, 2015, 2016, 2017),
                     selected = 2017,
                     multiple = FALSE,
-                    selectize = TRUE)
-      ),
+                    selectize = TRUE),
+        
+        selectInput('xvar', 
+                    "Select x variable", 
+                    choices = c(
+                      "Number of Beneficiaries" = "n_ab",
+                      "Per Capita Benchmark" = "updated_bnchmk",
+                      "Total Benchmark" = "a_btot_bnchmk",
+                      "Per Capita Expenditures" = "per_capita_exp_total_py",
+                      "Total Expenditures" = "a_btot_exp",
+                      "Shared Savings Rate" = "final_share_rate",
+                      "Quality Score" = "qual_score",
+                      "Savings/Losses Generated" = "bnchmk_min_exp",
+                      "Saving/Loss Rate" = "sav_rate",
+                      "Savings Earned" = "earn_save_loss",
+                      "Length of Services" = "service_length"
+                    )),
+        
+        selectInput('yvar', 
+                    "Select y variable", 
+                    choices = c(
+                      "Number of Beneficiaries" = "n_ab",
+                      "Per Capita Benchmark" = "updated_bnchmk",
+                      "Total Benchmark" = "a_btot_bnchmk",
+                      "Per Capita Expenditures" = "per_capita_exp_total_py",
+                      "Total Expenditures" = "a_btot_exp",
+                      "Shared Savings Rate" = "final_share_rate",
+                      "Quality Score" = "qual_score",
+                      "Savings/Losses Generated" = "bnchmk_min_exp",
+                      "Saving/Loss Rate" = "sav_rate",
+                      "Savings Earned" = "earn_save_loss",
+                      "Length of Services" = "service_length"
+                    ))
+        
+        ),
       
-      # Show a plot of the generated distribution
+      # The main panel will have several tabs.
       mainPanel(
         
         tabsetPanel(type = "tabs",
-                    tabPanel("Background", verbatimTextOutput("summary"), plotOutput("yearbars")),
-                    tabPanel("County Variation", plotOutput("distPlot")),
-                    tabPanel("Entrace and Exit", plotOutput("enterbars"), plotOutput("exitbars"))
+                    
+      # The first tab will have background information and some basic visualizations. 
+                    
+                    tabPanel("Background", 
+                             verbatimTextOutput("summary"), 
+                             plotOutput("yearbars")),
+      
+      # The next tab will present the relationship between various organizational variables. 
+      
+                    tabPanel("Program Features", 
+                             plotOutput("scatterfeatures")), 
+      
+      # The next tab will focus on variation at the county level with some plots and maps. 
+      # This is where selecting program year will be relevant. 
+      
+                    tabPanel("County Variation", 
+                             plotOutput("distPlot"), 
+                             plotOutput("countymap")),
+      
+      # The next tab will discuss entrance and exit in the MSSP program 
+      # and compare program features on that axis.
+      
+                    tabPanel("Entrace and Exit", 
+                             plotOutput("enterbars"), 
+                             plotOutput("exitbars"))
         )
       )
    )
 )
+
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
@@ -67,11 +125,23 @@ server <- function(input, output) {
      
    })
    
+   
+   output$scatterfeatures <- renderPlot({
+     aco_master %>%
+       ggplot(aes(x = input$xvar, y = input$yvar, color = year)) +
+       geom_point() +
+       labs(caption = "Data from the Center for Medicare and Medicaid Services",
+            color = "Colored by Year") +
+       theme_minimal() 
+     
+   })
+   
+   
    output$distPlot <- renderPlot({
      
      county_master %>%
        filter(year == input$year) %>%
-       ggplot(aes(x = aco_benes, fill = "red")) +
+       ggplot(aes(x = aco_benes, fill = "light blue")) +
        geom_density() +
        scale_x_log10(breaks = c(10, 100, 1000, 10000, 100000, 1000000), 
                      labels = c("10", "100", "1,000", "10,000", "100,000", "1,000,000")) +
@@ -79,12 +149,30 @@ server <- function(input, output) {
                           labels = c("0.0", "0.1", "0.2", "0.3", "0.4", "0.5")) +
        labs(x = "ACO beneficiaries in county (Log base 10)",
             y = "Density of Counties",
-            title = "The count of ACO beneficiaires by county",
+            title = "The count of MSSP beneficiaires by county",
             caption = "Data from the Center for Medicare and Medicaid Services") +
        theme_minimal() +
        theme(legend.position = "none") +
        scale_fill_manual(values = "light blue")
      
+   })
+   
+   output$countymap <- renderPlot({
+     county_master %>%
+       filter(year == input$year) %>%
+       ggplot(aes(fill = log(aco_benes + 1))) +
+       geom_sf() +
+       labs(title = "Medicare Shared Savings Program assigned beneficiaries by county",
+            subtitle = paste("Beneficiary population in ", input$year),
+            caption = "Data from the Center for Medicare and Medicaid Services",
+            fill = "Log Beneficiary Population") +
+       theme_minimal() +
+       theme(axis.title.x=element_blank(),
+             axis.text.x=element_blank(),
+             axis.ticks.x=element_blank(),
+             axis.title.y=element_blank(),
+             axis.text.y=element_blank(),
+             axis.ticks.y=element_blank()) 
    })
    
    output$enterbars <- renderPlot({
