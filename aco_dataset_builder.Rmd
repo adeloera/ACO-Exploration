@@ -201,7 +201,7 @@ aco_data_2017 <- read_csv("https://data.cms.gov/api/views/gk7c-vejx/rows.csv?acc
   
   #I also select just the variables that I may use in later analysis to have a more managable dataset. 
   
-  select(aco_num, aco_name, aco_state, initial_start_date, n_ab, sav_rate, bnchmk_min_exp, gen_save_loss, earn_save_loss, qual_score, updated_bnchmk, a_btot_bnchmk, a_btot_exp, final_share_rate)%>%
+  select(aco_num, aco_name, aco_state, initial_start_date, n_ab, sav_rate, bnchmk_min_exp, gen_save_loss, earn_save_loss, qual_score, updated_bnchmk, a_btot_bnchmk, a_btot_exp, final_share_rate, per_capita_exp_total_py)%>%
   
   #Next I reformat the intital start time variable as a date and creating a "length of service" variable. 
   
@@ -243,7 +243,7 @@ aco_data_2016 <- read_csv("https://data.cms.gov/api/views/3jk5-q6dr/rows.csv?acc
   
   #I also select just the variables that I may use in later analysis to have a more managable dataset. 
   
-  select(aco_num, aco_name, aco_state, initial_start_date, n_ab, sav_rate, bnchmk_min_exp, gen_save_loss, earn_save_loss, qual_score, updated_bnchmk, a_btot_bnchmk, a_btot_exp, final_share_rate)%>%
+  select(aco_num, aco_name, aco_state, initial_start_date, n_ab, sav_rate, bnchmk_min_exp, gen_save_loss, earn_save_loss, qual_score, updated_bnchmk, a_btot_bnchmk, a_btot_exp, final_share_rate, per_capita_exp_total_py)%>%
   
   #Next I reformat the intital start time variable as a date and creating a "length of service" variable. 
   
@@ -274,7 +274,7 @@ aco_data_2015 <- read_csv("https://data.cms.gov/api/views/7rrf-3gxr/rows.csv?acc
   
   #I also select just the variables that I may use in later analysis to have a more managable dataset. 
   
-  select(aco_num, aco_name, aco_state, start_date, n_ab, sav_rate, bnchmk_min_exp, gen_save_loss, earn_save_loss, qual_score, updated_bnchmk, a_btot_bnchmk, a_btot_exp, final_share_rate) %>%
+  select(aco_num, aco_name, aco_state, start_date, n_ab, sav_rate, bnchmk_min_exp, gen_save_loss, earn_save_loss, qual_score, updated_bnchmk, a_btot_bnchmk, a_btot_exp, final_share_rate, per_capita_exp_total_py) %>%
   
   #Next I reformat the intital start time variable as a date and creating a "length of service" variable. 
   
@@ -309,7 +309,7 @@ aco_data_2014 <- read_csv("https://data.cms.gov/api/views/888h-akbg/rows.csv?acc
   
   #I also select just the variables that I may use in later analysis to have a more managable dataset. 
   
-  select(aco_num, aco_name, aco_state, start_date, n_ab, sav_rate, bnchmk_min_exp, gen_save_loss, earn_save_loss, qual_score, updated_bnchmk, a_btot_bnchmk, a_btot_exp, final_share_rate) %>%
+  select(aco_num, aco_name, aco_state, start_date, n_ab, sav_rate, bnchmk_min_exp, gen_save_loss, earn_save_loss, qual_score, updated_bnchmk, a_btot_bnchmk, a_btot_exp, final_share_rate, per_capita_exp_total_py) %>%
   
   #Next I reformat the intital start time variable as a date and creating a "length of service" variable. 
   
