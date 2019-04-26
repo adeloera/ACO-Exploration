@@ -1,0 +1,25 @@
+---
+title: "ACO Explorations"
+author: "Andres de Loera-Brust"
+date: "April 26, 2019"
+output: html_document
+---
+
+This R markdown file creates sample code for the visualizations that will form the backbone of the exploration in the shiny application. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#As always, I begin by loading in the libraries I will use throughout the project. 
+
+library(tidyverse)
+library(ggthemes)
+
+#Next I read in the data I will use throughout the project. 
+
+aco_master <- read_rds("ACO_exploration/aco_master_file.rds")
+
+county_master <- read_rds("ACO_exploration/county_master_file.rds")
+
+```
+
