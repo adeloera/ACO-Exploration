@@ -17,9 +17,29 @@ library(ggthemes)
 
 #Next I read in the data I will use throughout the project. 
 
-aco_master <- read_rds("ACO_exploration/aco_master_file.rds")
+aco_master <- read_rds("ACO_exploration/aco_master_file.rds") %>%
+  mutate(qual_score = as.numeric(qual_score))
 
 county_master <- read_rds("ACO_exploration/county_master_file.rds")
+
+```
+
+```{r years, cache = TRUE}
+
+aco_master %>%
+  ggplot(aes(x = year, fill = "blue")) +
+  geom_bar() +
+  labs(x = "Year",
+       y = "Number of ACOs",
+       title = "MSSP Participation by Year",
+       caption = "Data from the Center for Medicare and Medicaid Services") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = "blue")
+
+aco_master %>%
+ggplot(aes(y = n_ab, group = year)) +
+  geom_boxplot()
 
 ```
 

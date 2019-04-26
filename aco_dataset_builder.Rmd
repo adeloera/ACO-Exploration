@@ -300,7 +300,7 @@ aco_data_2014 <- read_csv("https://data.cms.gov/api/views/888h-akbg/rows.csv?acc
                             ACO_NAME = col_character(),
                             ACO_State = col_character(),
                             Start_Date = col_character(),
-                            QualScore = col_character()
+                            QualScore = col_double()
 )) %>%
   
   #I call clean_names for ease of use later.
