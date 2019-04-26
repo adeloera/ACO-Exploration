@@ -13,15 +13,12 @@ library(tidyverse)
 library(ggthemes)
 
 #I make sure the data I need is available: 
-master <- read_csv("master_file.csv", 
-                   col_names = TRUE,
-                   cols(
-                     state_name = col_character(),
-                     county_name = col_character(),
-                     aco_benes = col_double(),
-                     year = col_double(),
-                     geometry = col_character()
-                   ))
+
+aco_master <- read_rds("aco_master_file.rds") %>%
+  mutate(qual_score = as.numeric(qual_score))
+
+county_master <- read_rds("county_master_file.rds")
+
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -32,37 +29,97 @@ ui <- fluidPage(
    # Sidebar with a slider input for number of bins 
    sidebarLayout(
       sidebarPanel(
-         sliderInput("bins",
-                     "Number of bins:",
-                     min = 1,
-                     max = 50,
-                     value = 30)
+        selectInput("year",
+                    "Select Program Year",
+                    choices = c(2014, 2015, 2016, 2017),
+                    selected = 2017,
+                    multiple = FALSE,
+                    selectize = TRUE)
       ),
       
       # Show a plot of the generated distribution
       mainPanel(
-         plotOutput("distPlot")
+        
+        tabsetPanel(type = "tabs",
+                    tabPanel("Background", verbatimTextOutput("summary"), plotOutput("yearbars")),
+                    tabPanel("County Variation", plotOutput("distPlot")),
+                    tabPanel("Entrace and Exit", plotOutput("enterbars"), plotOutput("exitbars"))
+        )
       )
    )
 )
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+  
+   output$yearbars <- renderPlot({
+     
+     aco_master %>%
+       ggplot(aes(x = year, fill = "blue")) +
+       geom_bar() +
+       labs(x = "Year",
+            y = "Number of ACOs",
+            title = "MSSP Participation by Year",
+            caption = "Data from the Center for Medicare and Medicaid Services") +
+       theme_minimal() +
+       theme(legend.position = "none") +
+       scale_fill_manual(values = "blue")
+     
+   })
    
    output$distPlot <- renderPlot({
-     master %>%
+     
+     county_master %>%
+       filter(year == input$year) %>%
        ggplot(aes(x = aco_benes, fill = "red")) +
-       geom_histogram(bins = input$bins) +
+       geom_density() +
        scale_x_log10(breaks = c(10, 100, 1000, 10000, 100000, 1000000), 
                      labels = c("10", "100", "1,000", "10,000", "100,000", "1,000,000")) +
+       scale_y_continuous(breaks = c(0.0, 0.1, 0.2, 0.3, 0.4, 0.5),
+                          labels = c("0.0", "0.1", "0.2", "0.3", "0.4", "0.5")) +
        labs(x = "ACO beneficiaries in county (Log base 10)",
-            y = "Number of counties",
+            y = "Density of Counties",
             title = "The count of ACO beneficiaires by county",
-            subtitle = "There is large variation in ACO participation across counties",
             caption = "Data from the Center for Medicare and Medicaid Services") +
-       theme_economist() +
-       theme(legend.position = "none")
+       theme_minimal() +
+       theme(legend.position = "none") +
+       scale_fill_manual(values = "light blue")
+     
    })
+   
+   output$enterbars <- renderPlot({
+     
+     aco_master %>%
+     filter(entered == 1) %>%
+     ggplot(aes(x = year, fill = "blue")) +
+     geom_bar() +
+     labs(x = "Year",
+          y = "Number of ACOs that Entered",
+          title = "MSSP Entrance by Year",
+          caption = "Data from the Center for Medicare and Medicaid Services") +
+     theme_minimal() +
+     theme(legend.position = "none") +
+     scale_fill_manual(values = "green")
+     
+   })
+   
+   output$exitbars <- renderPlot({
+     
+     aco_master %>%
+       filter(exit == 1) %>%
+       ggplot(aes(x = year, fill = "blue")) +
+       geom_bar() +
+       labs(x = "Year",
+            y = "Number of ACOs that Exited",
+            title = "MSSP Exit by Year",
+            caption = "Data from the Center for Medicare and Medicaid Services") +
+       theme_minimal() +
+       theme(legend.position = "none") +
+       scale_fill_manual(values = "red")
+    
+   })
+   
+   
 }
 
 # Run the application 
