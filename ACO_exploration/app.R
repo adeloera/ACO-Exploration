@@ -142,7 +142,7 @@ server <- function(input, output) {
      
      aco_master %>%
        ggplot(aes_string(x = input$xvar, y = input$yvar), aes(color = year)) +
-       geom_point() +
+       geom_point(alpha = 0.25) +
        labs(caption = "Data from the Center for Medicare and Medicaid Services",
             color = "Colored by Year",
             x = paste(filter(xvar_lookup, symbol==input$xvar)["name"]),
