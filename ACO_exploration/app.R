@@ -21,6 +21,40 @@ aco_master <- read_rds("aco_master_file.rds") %>%
 county_master <- read_rds("county_master_file.rds")
 
 
+xvar_choices <- tibble(
+  "Number of Beneficiaries" = "n_ab",
+  "Per Capita Benchmark" = "updated_bnchmk",
+  "Total Benchmark" = "a_btot_bnchmk",
+  "Per Capita Expenditures" = "per_capita_exp_total_py",
+  "Total Expenditures" = "a_btot_exp",
+  "Shared Savings Rate" = "final_share_rate",
+  "Quality Score" = "qual_score",
+  "Savings/Losses Generated" = "bnchmk_min_exp",
+  "Saving/Loss Rate" = "sav_rate",
+  "Savings Earned" = "earn_save_loss",
+  "Length of Services" = "service_length")
+
+xvar_lookup <- 
+  xvar_choices %>% 
+  gather(name, symbol)
+
+yvar_choices <- tibble(
+  "Number of Beneficiaries" = "n_ab",
+  "Per Capita Benchmark" = "updated_bnchmk",
+  "Total Benchmark" = "a_btot_bnchmk",
+  "Per Capita Expenditures" = "per_capita_exp_total_py",
+  "Total Expenditures" = "a_btot_exp",
+  "Shared Savings Rate" = "final_share_rate",
+  "Quality Score" = "qual_score",
+  "Savings/Losses Generated" = "bnchmk_min_exp",
+  "Saving/Loss Rate" = "sav_rate",
+  "Savings Earned" = "earn_save_loss",
+  "Length of Services" = "service_length")
+
+yvar_lookup <- 
+  yvar_choices %>% 
+  gather(name, symbol)
+
 # Define UI for application that draws a histogram
 ui <- fluidPage(
    
@@ -40,35 +74,13 @@ ui <- fluidPage(
         
         selectInput('xvar', 
                     "Select x variable", 
-                    choices = c(
-                      "Number of Beneficiaries" = "n_ab",
-                      "Per Capita Benchmark" = "updated_bnchmk",
-                      "Total Benchmark" = "a_btot_bnchmk",
-                      "Per Capita Expenditures" = "per_capita_exp_total_py",
-                      "Total Expenditures" = "a_btot_exp",
-                      "Shared Savings Rate" = "final_share_rate",
-                      "Quality Score" = "qual_score",
-                      "Savings/Losses Generated" = "bnchmk_min_exp",
-                      "Saving/Loss Rate" = "sav_rate",
-                      "Savings Earned" = "earn_save_loss",
-                      "Length of Services" = "service_length"
-                    )),
+                    choices = xvar_choices,
+                    selected = "service_length"),
         
         selectInput('yvar', 
                     "Select y variable", 
-                    choices = c(
-                      "Number of Beneficiaries" = "n_ab",
-                      "Per Capita Benchmark" = "updated_bnchmk",
-                      "Total Benchmark" = "a_btot_bnchmk",
-                      "Per Capita Expenditures" = "per_capita_exp_total_py",
-                      "Total Expenditures" = "a_btot_exp",
-                      "Shared Savings Rate" = "final_share_rate",
-                      "Quality Score" = "qual_score",
-                      "Savings/Losses Generated" = "bnchmk_min_exp",
-                      "Saving/Loss Rate" = "sav_rate",
-                      "Savings Earned" = "earn_save_loss",
-                      "Length of Services" = "service_length"
-                    ))
+                    choices = yvar_choices,
+                    selected = "bnchmk_min_exp")
         
         ),
       
@@ -127,11 +139,15 @@ server <- function(input, output) {
    
    
    output$scatterfeatures <- renderPlot({
+     
      aco_master %>%
-       ggplot(aes(x = input$xvar, y = input$yvar, color = year)) +
+       ggplot(aes_string(x = input$xvar, y = input$yvar), aes(color = year)) +
        geom_point() +
        labs(caption = "Data from the Center for Medicare and Medicaid Services",
-            color = "Colored by Year") +
+            color = "Colored by Year",
+            x = paste(filter(xvar_lookup, symbol==input$xvar)["name"]),
+            y = paste(filter(yvar_lookup, symbol==input$yvar)["name"]),
+            title = "The Relationship Between Organizational Variables in the MSSP") +
        theme_minimal() 
      
    })
