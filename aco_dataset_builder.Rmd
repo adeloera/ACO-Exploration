@@ -168,7 +168,161 @@ county_map <- read_sf("cb_2016_us_county_500k.shp") %>%
   clean_names()
 
 
-#Here I download the ACO level datasets with more detailed program paramenters from the CMS website and perform some basic cleaning. 
+#Next I import some county level data about the Medicare Program as a whole, 
+#which I will use to compare with the MSSP.
+
+#First I download the zip file with all the data.
+
+download.file(url = "https://downloads.cms.gov/files/State-County-All-Table-2017.zip",
+              dest = "medicare_spending.zip",
+              mode = "wb")
+
+#I then untar it, which yields "State County All Table 2017.xlsx" which has a lot of data for each year. 
+#The data for each year is kept as a seperate sheet in this spreadsheet. 
+
+untar("medicare_spending.zip")
+
+#Now I read in and lightly clean the data for each year. 
+#Starting with 2017...
+
+county_medicare_2017 <- read_excel("State County All Table 2017.xlsx", 
+    sheet = "State_county 2017", skip = 1) %>%
+  
+  #I call clean names to ease of use.
+  
+  clean_names() %>%
+  
+  #I select just the variables I will use
+  
+  select(state, county, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, ma_participation_rate, average_age, total_actual_costs, actual_per_capita_costs) %>%
+  
+  #I remove the observations that are not counties or are not in the contiguous US.
+  
+  filter(!is.na(state_and_county_fips_code), state != "AK", state != "HI") %>%
+  
+  #I then set variables to be numerics with zeroes as appropriate. 
+  
+  mutate(beneficiaries_with_part_a_and_part_b = as.numeric(beneficiaries_with_part_a_and_part_b),
+         beneficiaries_with_part_a_and_part_b = replace_na(beneficiaries_with_part_a_and_part_b, 0),
+         ma_beneficiaries = as.numeric(ma_beneficiaries),
+         ma_beneficiaries = replace_na(ma_beneficiaries, 0),
+         average_age = as.numeric(average_age),
+         average_age = replace_na(average_age, 0),
+         actual_per_capita_costs = as.numeric(actual_per_capita_costs),
+         actual_per_capita_costs = replace_na(actual_per_capita_costs, 0),
+         ffs_beneficiaries = as.numeric(ffs_beneficiaries),
+         ffs_beneficiaries = replace_na(ffs_beneficiaries, 0)) %>%
+  
+  #Lastly I mutate the state variable from codes to names
+  
+  mutate(state = state.name[match(state,state.abb)])
+
+#I repeat the process for the preceding years too. 
+#Now 2016...
+
+county_medicare_2016 <- read_excel("State County All Table 2017.xlsx", 
+    sheet = "State_county 2016", skip = 1) %>%
+  
+  #I call clean names to ease of use.
+  
+  clean_names() %>%
+  
+  #I select just the variables I will use
+  
+  select(state, county, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, ma_participation_rate, average_age, total_actual_costs, actual_per_capita_costs) %>%
+  
+  #I remove the observations that are not counties or are not in the contiguous US.
+  
+  filter(!is.na(state_and_county_fips_code), state != "AK", state != "HI") %>%
+  
+  #I then set variables to be numerics with zeroes as appropriate. 
+  
+  mutate(beneficiaries_with_part_a_and_part_b = as.numeric(beneficiaries_with_part_a_and_part_b),
+         beneficiaries_with_part_a_and_part_b = replace_na(beneficiaries_with_part_a_and_part_b, 0),
+         ma_beneficiaries = as.numeric(ma_beneficiaries),
+         ma_beneficiaries = replace_na(ma_beneficiaries, 0),
+         average_age = as.numeric(average_age),
+         average_age = replace_na(average_age, 0),
+         actual_per_capita_costs = as.numeric(actual_per_capita_costs),
+         actual_per_capita_costs = replace_na(actual_per_capita_costs, 0),
+         ffs_beneficiaries = as.numeric(ffs_beneficiaries),
+         ffs_beneficiaries = replace_na(ffs_beneficiaries, 0)) %>%
+  
+  #Lastly I mutate the state variable from codes to names
+  
+  mutate(state = state.name[match(state,state.abb)])
+
+#Now for 2015:
+
+county_medicare_2015 <- read_excel("State County All Table 2017.xlsx", 
+    sheet = "State_county 2015", skip = 1) %>%
+  
+  #I call clean names to ease of use.
+  
+  clean_names() %>%
+  
+  #I select just the variables I will use
+  
+  select(state, county, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, ma_participation_rate, average_age, total_actual_costs, actual_per_capita_costs) %>%
+  
+  #I remove the observations that are not counties or are not in the contiguous US.
+  
+  filter(!is.na(state_and_county_fips_code), state != "AK", state != "HI") %>%
+  
+  #I then set variables to be numerics with zeroes as appropriate. 
+  
+  mutate(beneficiaries_with_part_a_and_part_b = as.numeric(beneficiaries_with_part_a_and_part_b),
+         beneficiaries_with_part_a_and_part_b = replace_na(beneficiaries_with_part_a_and_part_b, 0),
+         ma_beneficiaries = as.numeric(ma_beneficiaries),
+         ma_beneficiaries = replace_na(ma_beneficiaries, 0),
+         average_age = as.numeric(average_age),
+         average_age = replace_na(average_age, 0),
+         actual_per_capita_costs = as.numeric(actual_per_capita_costs),
+         actual_per_capita_costs = replace_na(actual_per_capita_costs, 0),
+         ffs_beneficiaries = as.numeric(ffs_beneficiaries),
+         ffs_beneficiaries = replace_na(ffs_beneficiaries, 0)) %>%
+  
+  #Lastly I mutate the state variable from codes to names
+  
+  mutate(state = state.name[match(state,state.abb)])
+
+#And finally 2014:
+
+county_medicare_2014 <- read_excel("State County All Table 2017.xlsx", 
+    sheet = "State_county 2014", skip = 1) %>%
+  
+  #I call clean names to ease of use.
+  
+  clean_names() %>%
+  
+  #I select just the variables I will use
+  
+  select(state, county, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, ma_participation_rate, average_age, total_actual_costs, actual_per_capita_costs) %>%
+  
+  #I remove the observations that are not counties or are not in the contiguous US.
+  
+  filter(!is.na(state_and_county_fips_code), state != "AK", state != "HI") %>%
+  
+  #I then set variables to be numerics with zeroes as appropriate. 
+  
+  mutate(beneficiaries_with_part_a_and_part_b = as.numeric(beneficiaries_with_part_a_and_part_b),
+         beneficiaries_with_part_a_and_part_b = replace_na(beneficiaries_with_part_a_and_part_b, 0),
+         ma_beneficiaries = as.numeric(ma_beneficiaries),
+         ma_beneficiaries = replace_na(ma_beneficiaries, 0),
+         average_age = as.numeric(average_age),
+         average_age = replace_na(average_age, 0),
+         actual_per_capita_costs = as.numeric(actual_per_capita_costs),
+         actual_per_capita_costs = replace_na(actual_per_capita_costs, 0),
+         ffs_beneficiaries = as.numeric(ffs_beneficiaries),
+         ffs_beneficiaries = replace_na(ffs_beneficiaries, 0)) %>%
+  
+  #Lastly I mutate the state variable from codes to names
+  
+  mutate(state = state.name[match(state,state.abb)])
+
+
+#Here I download the ACO level datasets with more detailed program paramenters 
+#from the CMS website and perform some basic cleaning. 
 
 #I begin with the 2017 dataset. 
 #I read in the dataset from a url of CMS's data download site. I use col_names and deliberately set the format of some of the columns. 
@@ -426,7 +580,7 @@ continental_county_shapes <- county_map %>%
   select(state_name, name, geometry) 
 
 #Finally I will merge all my datasets together to create the master file I can use to map. 
-#First I add the shape data to each years dataset
+#First I add the shape data to each years dataset, then the county level data. 
 #So I start with the 2017 county level ACO data.
 
 temp_2017 <- county_lvl_aco_2017 %>%
@@ -439,10 +593,20 @@ temp_2017 <- county_lvl_aco_2017 %>%
   
   full_join(continental_county_shapes, by = c("state_name" = "state_name", "county_name" = "name")) %>%
   
-  #Finally I just select the data I will use.
+  #Then I merge with the county level medicare data.
+  
+  full_join(county_medicare_2017, by = c("state_name" = "state", "county_name" = "county")) %>%
+  
+  #Next I just select the data I want.
   
   ungroup() %>%
-  select(state_name, county_name, aco_benes, year, geometry)
+  select(state_name, county_name, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, aco_benes, year, geometry) %>%
+  
+  #Then I create MA and ACO participation rate variables. 
+  
+  mutate(aco_participation_rate = aco_benes/(ffs_beneficiaries+ma_beneficiaries),
+         ma_participation_rate = ma_beneficiaries/(ffs_beneficiaries+ma_beneficiaries),
+         log_aco_benes = log(aco_benes + 1))
 
 
 #I repeat the process with the 2016 data:
@@ -457,10 +621,20 @@ temp_2016 <- county_lvl_aco_2016 %>%
   
   full_join(continental_county_shapes, by = c("state_name" = "state_name", "county_name" = "name")) %>%
   
-  #Finally I just select the data I will use.
+  #Then I merge with the county level medicare data.
+  
+  full_join(county_medicare_2017, by = c("state_name" = "state", "county_name" = "county")) %>%
+  
+  #Next I just select the data I want.
   
   ungroup() %>%
-  select(state_name, county_name, aco_benes, year, geometry)
+  select(state_name, county_name, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, aco_benes, year, geometry) %>%
+  
+  #Then I create MA and ACO participation rate variables. 
+  
+  mutate(aco_participation_rate = aco_benes/(ffs_beneficiaries+ma_beneficiaries),
+         ma_participation_rate = ma_beneficiaries/(ffs_beneficiaries+ma_beneficiaries),
+         log_aco_benes = log(aco_benes + 1))
 
 #And again with 2015: 
 
@@ -474,10 +648,20 @@ temp_2015 <- county_lvl_aco_2015 %>%
   
   full_join(continental_county_shapes, by = c("state_name" = "state_name", "county_name" = "name")) %>%
   
-  #Finally I just select the data I will use.
+  #Then I merge with the county level medicare data.
+  
+  full_join(county_medicare_2017, by = c("state_name" = "state", "county_name" = "county")) %>%
+  
+  #Next I just select the data I want.
   
   ungroup() %>%
-  select(state_name, county_name, aco_benes, year, geometry)
+  select(state_name, county_name, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, aco_benes, year, geometry) %>%
+  
+  #Then I create MA and ACO participation rate variables. 
+  
+  mutate(aco_participation_rate = aco_benes/(ffs_beneficiaries+ma_beneficiaries),
+         ma_participation_rate = ma_beneficiaries/(ffs_beneficiaries+ma_beneficiaries),
+         log_aco_benes = log(aco_benes + 1))
 
 #Finally with 2014: 
 
@@ -491,14 +675,36 @@ temp_2014 <- county_lvl_aco_2014 %>%
   
   full_join(continental_county_shapes, by = c("state_name" = "state_name", "county_name" = "name")) %>%
   
-  #Finally I just select the data I will use.
+  #Then I merge with the county level medicare data.
+  
+  full_join(county_medicare_2017, by = c("state_name" = "state", "county_name" = "county")) %>%
+  
+  #Next I just select the data I want.
   
   ungroup() %>%
-  select(state_name, county_name, aco_benes, year, geometry)
+  select(state_name, county_name, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, aco_benes, year, geometry) %>%
+  
+  #Then I create MA and ACO participation rate variables and add a logged aco_beneficiaries variable. 
+  
+  mutate(aco_participation_rate = aco_benes/(ffs_beneficiaries+ma_beneficiaries),
+         ma_participation_rate = ma_beneficiaries/(ffs_beneficiaries+ma_beneficiaries),
+         log_aco_benes = log(aco_benes + 1))
 
 #Now I merge all of these datasets together "vertically" to create a master dataset where the unit of observation is a county year and the important data is the geometry and the number of beneficiaries. 
 
-county_master <- rbind(temp_2017, temp_2016, temp_2015, temp_2014)
+
+county_master <- rbind(temp_2017, temp_2016, temp_2015, temp_2014) %>%
+  
+  #I also do some cleaning to get rid of unknown counties or year.
+  
+  filter(county_name != "UNKNOWN") %>%
+  
+  #Next I replace na's with zeroes where relevant.
+  
+  mutate(aco_benes = replace_na(aco_benes, 0),
+         ma_beneficiaries = replace_na(ma_beneficiaries, 0),
+         aco_participation_rate = replace_na(aco_participation_rate, 0),
+         ma_participation_rate = replace_na(ma_participation_rate, 0))
 
 
 #Now I do some manipulation on the detailed ACO level datasets to accomplish two goals:
