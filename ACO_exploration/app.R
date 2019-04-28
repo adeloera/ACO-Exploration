@@ -44,10 +44,12 @@ feature_lookup <-
   gather(name, symbol)
 
 
-# Define UI for application that draws a histogram
-ui <- fluidPage(
-   
-   # Application title
+# Define UI for application
+#The first argument defines the theme for the app, which I chose to be "spacelab" 
+
+ui <- fluidPage(theme = shinytheme("spacelab"),
+  
+   # I set the pplication title
   
    titlePanel("Exploring the Medicare Shared Savings Program"),
    
@@ -56,6 +58,8 @@ ui <- fluidPage(
    
    sidebarLayout(
       sidebarPanel(
+        
+        #On the background panel I only add a selector for year.
         
         conditionalPanel(
           condition = "input.tabs == 'Background'",
@@ -68,6 +72,7 @@ ui <- fluidPage(
                       selectize = TRUE)
         ),
         
+        #On the county variation panel I again only add a selector for year. 
         
         conditionalPanel(
           condition = "input.tabs == 'County Variation'",
@@ -79,6 +84,9 @@ ui <- fluidPage(
                     multiple = FALSE,
                     selectize = TRUE)
          ),
+        
+        #On the program features panel I give choices for the x and y variables
+        #I also add a box that can be checked to add a fitted line. 
         
         conditionalPanel(
           condition = "input.tabs == 'Program Features'",
@@ -98,6 +106,8 @@ ui <- fluidPage(
                         FALSE)
           
          ),
+        
+        #On the entrance and exit panel I give the user the choice of what variables to consider. 
         
          conditionalPanel(
            condition = "input.tabs == 'Entrance and Exit'",
@@ -155,8 +165,13 @@ ui <- fluidPage(
 )
 
 
-# Define server logic required to draw a histogram
+# Define server logic required for the app.
+
 server <- function(input, output) {
+  
+  
+  #Here I make a simple bar chart showing the number of MSSP Participating ACOs every year. 
+  #The additional arguments just set the labels, theme and color. 
   
    output$yearbars <- renderPlot({
      
@@ -167,7 +182,7 @@ server <- function(input, output) {
             y = "Number of ACOs",
             title = "MSSP Participation by Year",
             caption = "Data from the Center for Medicare and Medicaid Services") +
-       theme_minimal() +
+       theme_economist_white() +
        theme(legend.position = "none") +
        scale_fill_manual(values = "blue")
      
@@ -176,17 +191,23 @@ server <- function(input, output) {
    
    output$scatterfeatures <- renderPlot({
      
+     #Here I create a scatterplot of the two user-selected variables. 
+     #The label arguments are set such that the labels will change to respond to the users selection. 
+     
     p <- aco_master %>%
-       ggplot(aes_string(x = input$xvar, y = input$yvar), aes(color = year)) +
+       ggplot(aes_string(x = input$xvar, y = input$yvar)) +
        geom_point(alpha = 0.25) +
        labs(caption = "Data from the Center for Medicare and Medicaid Services",
             color = "Colored by Year",
             x = paste(filter(feature_lookup, symbol==input$xvar)["name"]),
             y = paste(filter(feature_lookup, symbol==input$yvar)["name"]),
             title = "The Relationship Between Organizational Variables in the MSSP") +
-       theme_minimal() 
+       theme_economist_white() 
+    
+    #I also add a linear fit if the user selects it. 
     
     if(input$fit == TRUE) {
+      
       
       p + geom_smooth(method = "lm", se = FALSE)
       
@@ -197,6 +218,9 @@ server <- function(input, output) {
     }
      
    })
+   
+   #Here I create a regression table for the linear model.
+   #It's defined to only appear if the user selects the relevant box.
    
    output$program_feature_stats <- renderUI({
      
@@ -220,10 +244,11 @@ server <- function(input, output) {
        
      }
      
-     
    })
    
-   
+   #Here I make a density plot of beneficiaries per county. 
+   #I set the axes deliberately to get an appealing and interpretable chart. 
+   #I also set the labels, color and theme for asthetic appeal. 
    
    output$distPlot <- renderPlot({
      
@@ -239,11 +264,15 @@ server <- function(input, output) {
             y = "Density of Counties",
             title = "The count of MSSP beneficiaires by county",
             caption = "Data from the Center for Medicare and Medicaid Services") +
-       theme_minimal() +
+       theme_economist_white() +
        theme(legend.position = "none") +
        scale_fill_manual(values = "light blue")
      
    })
+   
+   #Here I create a map of the counties in the contiguous united states, filled by ACO beneficiaries.
+   #The user gets to set the year prsented and the subtitle will respond to the users selection.
+   #The other arguments set the theme and labels for clarity.  
    
    output$countymap <- renderPlot({
      
@@ -255,7 +284,7 @@ server <- function(input, output) {
             subtitle = paste("Beneficiary population in ", input$year),
             caption = "Data from the Center for Medicare and Medicaid Services",
             fill = "Log Beneficiary Population") +
-       theme_minimal() +
+       theme_economist_white() +
        theme(axis.title.x=element_blank(),
              axis.text.x=element_blank(),
              axis.ticks.x=element_blank(),
@@ -264,6 +293,8 @@ server <- function(input, output) {
              axis.ticks.y=element_blank()) 
      
    })
+   
+   #HereI make a bar chart of program entrances by year.
    
    output$enterbars <- renderPlot({
      
@@ -275,11 +306,14 @@ server <- function(input, output) {
           y = "Number of ACOs that Entered",
           title = "MSSP Entrance by Year",
           caption = "Data from the Center for Medicare and Medicaid Services") +
-     theme_minimal() +
+     theme_economist_white() +
      theme(legend.position = "none") +
      scale_fill_manual(values = "dark green")
      
    })
+   
+   #Here I make a reactive violin plot where the variable of analysis is selected by the user.
+   #It compares newly entered ACOs to ACOs that have been in the program longer than a year. 
    
    output$enterviolin <- renderPlot({
      
@@ -292,10 +326,12 @@ server <- function(input, output) {
             y = paste(filter(feature_lookup, symbol==input$violinvar)["name"]),
             title = "Organization features vary by continuing or entering status",
             caption = "Data from the Center for Medicare and Medicaid Services") +
-       theme_minimal() +
+       theme_economist_white() +
        scale_fill_manual(values = "green")
      
    })
+   
+   #Here I make a bar chart of program exits by year. 
    
    output$exitbars <- renderPlot({
      
@@ -307,11 +343,14 @@ server <- function(input, output) {
             y = "Number of ACOs that Exited",
             title = "MSSP Exit by Year",
             caption = "Data from the Center for Medicare and Medicaid Services") +
-       theme_minimal() +
+       theme_economist_white() +
        theme(legend.position = "none") +
        scale_fill_manual(values = "red")
     
    })
+   
+   #Here I make a reactive violin plot where the variable of analysis is selected by the user.
+   #It compares ACOs that exit in a given year to those that dont.  
    
    output$exitviolin <- renderPlot({
      
@@ -324,7 +363,7 @@ server <- function(input, output) {
             y = paste(filter(feature_lookup, symbol==input$violinvar)["name"]),
             title = "Organization features vary by continuing or exiting status",
             caption = "Data from the Center for Medicare and Medicaid Services") +
-       theme_minimal() +
+       theme_economist_white() +
        scale_fill_manual(values = "red")
      
    })
@@ -333,5 +372,6 @@ server <- function(input, output) {
 }
 
 # Run the application 
+
 shinyApp(ui = ui, server = server)
 
