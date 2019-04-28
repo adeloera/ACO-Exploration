@@ -61,13 +61,18 @@ ui <- fluidPage(
         
         selectInput('xvar', 
                     "Select x variable", 
-                    choices = xvar_choices,
+                    choices = feature_choices,
                     selected = "service_length"),
         
         selectInput('yvar', 
                     "Select y variable", 
-                    choices = yvar_choices,
-                    selected = "bnchmk_min_exp")
+                    choices = feature_choices,
+                    selected = "bnchmk_min_exp"),
+        
+        selectInput("box1var",
+                    "Select a variable to compare on",
+                    choices = feature_choices,
+                    selected = "earn_save_loss")
         
         ),
       
@@ -79,19 +84,24 @@ ui <- fluidPage(
       # The first tab will have background information and some basic visualizations. 
                     
                     tabPanel("Background", 
+                             
                              verbatimTextOutput("summary"), 
+                             
                              plotOutput("yearbars")),
       
       # The next tab will present the relationship between various organizational variables. 
       
                     tabPanel("Program Features", 
+                             
                              plotOutput("scatterfeatures")), 
       
       # The next tab will focus on variation at the county level with some plots and maps. 
       # This is where selecting program year will be relevant. 
       
-                    tabPanel("County Variation", 
+                    tabPanel("County Variation",
+                             
                              plotOutput("distPlot"), 
+                             
                              plotOutput("countymap")),
       
       # The next tab will discuss entrance and exit in the MSSP program 
@@ -99,7 +109,12 @@ ui <- fluidPage(
       
                     tabPanel("Entrace and Exit", 
                              plotOutput("enterbars"), 
-                             plotOutput("exitbars"))
+                             
+                             plotOutput("enterboxplot"),
+                             
+                             plotOutput("exitbars"),
+                             
+                             plotOutput("exitboxplot"))
         )
       )
    )
@@ -161,6 +176,7 @@ server <- function(input, output) {
    })
    
    output$countymap <- renderPlot({
+     
      county_master %>%
        filter(year == input$year) %>%
        ggplot(aes(fill = log(aco_benes + 1))) +
@@ -176,6 +192,7 @@ server <- function(input, output) {
              axis.title.y=element_blank(),
              axis.text.y=element_blank(),
              axis.ticks.y=element_blank()) 
+     
    })
    
    output$enterbars <- renderPlot({
@@ -194,6 +211,22 @@ server <- function(input, output) {
      
    })
    
+   output$enterboxplot <- renderPlot({
+     
+     aco_master %>%
+       ggplot(aes_string(y = input$box1var, group = "entered", x = "entered")) +
+       geom_violin(alpha = 0.25, fill = "green") + 
+       scale_x_continuous(breaks = c(0, 1),
+                          labels = c("Continuing", "Entering")) +
+       labs(x = element_blank(),
+            y = paste(filter(feature_lookup, symbol==input$box1var)["name"]),
+            title = "Organization features vary by continuing or entering status",
+            caption = "Data from the Center for Medicare and Medicaid Services") +
+       theme_minimal() +
+       scale_fill_manual(values = "green")
+     
+   })
+   
    output$exitbars <- renderPlot({
      
      aco_master %>%
@@ -208,6 +241,22 @@ server <- function(input, output) {
        theme(legend.position = "none") +
        scale_fill_manual(values = "red")
     
+   })
+   
+   output$exitboxplot <- renderPlot({
+     
+     aco_master %>%
+       ggplot(aes_string(y = input$box1var, group = "exit", x = "exit")) +
+       geom_violin(alpha = 0.25, fill = "red")+
+       scale_x_continuous(breaks = c(0, 1),
+                          labels = c("Continuing", "Exiting")) +
+       labs(x = element_blank(),
+            y = paste(filter(feature_lookup, symbol==input$box1var)["name"]),
+            title = "Organization features vary by continuing or exiting status",
+            caption = "Data from the Center for Medicare and Medicaid Services") +
+       theme_minimal() +
+       scale_fill_manual(values = "red")
+     
    })
    
    
