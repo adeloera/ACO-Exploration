@@ -37,10 +37,17 @@ feature_choices <- tibble(
   "Savings Earned" = "earn_save_loss",
   "Length of Services" = "service_length")
 
+aco_choices <- tibble(
+  "Log Number of ACO Beneficiaries" = "log_aco_benes",
+  "ACO Participation Rate" = "aco_participation_rate")
+
 #I also create a way to look up the label of the variables so I can have reactive axes. 
 
 feature_lookup <- 
   feature_choices %>% 
+  gather(name, symbol)
+
+aco_choice_lookup <- aco_choices %>%
   gather(name, symbol)
 
 
@@ -82,7 +89,12 @@ ui <- fluidPage(theme = shinytheme("spacelab"),
                     choices = c(2014, 2015, 2016, 2017),
                     selected = 2017,
                     multiple = FALSE,
-                    selectize = TRUE)
+                    selectize = TRUE),
+          
+          selectInput("acovar",
+                      "Select a variable to map",
+                      choices = aco_choices, 
+                      selected = "log_aco_benes")
          ),
         
         #On the program features panel I give choices for the x and y variables
@@ -145,6 +157,8 @@ ui <- fluidPage(theme = shinytheme("spacelab"),
                     tabPanel("County Variation",
                              
                              plotOutput("distPlot"), 
+                             
+                             plotOutput("penePlot"),
                              
                              plotOutput("countymap")),
       
@@ -270,6 +284,24 @@ server <- function(input, output) {
      
    })
    
+   #Here I make a plot showing the distribution of counties based on their ACO participation rate. 
+   
+   output$penePlot <- renderPlot({
+     
+     county_master %>%
+       filter(year == input$year) %>%
+       ggplot(aes(x = aco_participation_rate, fill = "light blue")) +
+       geom_density() +
+       labs(x = "ACO participation rate in county",
+            y = "Density of Counties",
+            title = "The distribution of MSSP participation by county",
+            caption = "Data from the Center for Medicare and Medicaid Services") +
+       theme_economist_white() +
+       theme(legend.position = "none") +
+       scale_fill_manual(values = "dark blue")
+     
+   })
+   
    #Here I create a map of the counties in the contiguous united states, filled by ACO beneficiaries.
    #The user gets to set the year prsented and the subtitle will respond to the users selection.
    #The other arguments set the theme and labels for clarity.  
@@ -278,12 +310,12 @@ server <- function(input, output) {
      
      county_master %>%
        filter(year == input$year) %>%
-       ggplot(aes(fill = log(aco_benes + 1))) +
+       ggplot(aes_string(fill = input$acovar)) +
        geom_sf() +
-       labs(title = "Medicare Shared Savings Program assigned beneficiaries by county",
-            subtitle = paste("Beneficiary population in ", input$year),
+       labs(title = "Distribution of the Medicare Shared Savings Program by county",
+            subtitle = paste(filter(aco_choice_lookup, symbol==input$acovar)["name"], " by county in ", input$year),
             caption = "Data from the Center for Medicare and Medicaid Services",
-            fill = "Log Beneficiary Population") +
+            fill = paste(filter(aco_choice_lookup, symbol==input$acovar)["name"])) +
        theme_economist_white() +
        theme(axis.title.x=element_blank(),
              axis.text.x=element_blank(),
