@@ -92,7 +92,10 @@ ui <- fluidPage(
           selectInput('yvar', 
                     "Select y variable", 
                     choices = feature_choices,
-                    selected = "bnchmk_min_exp")
+                    selected = "bnchmk_min_exp"),
+          
+          checkboxInput("fit", "Fit a linear model?", FALSE)
+          
         
          ),
         
@@ -171,7 +174,7 @@ server <- function(input, output) {
    
    output$scatterfeatures <- renderPlot({
      
-     aco_master %>%
+    p <- aco_master %>%
        ggplot(aes_string(x = input$xvar, y = input$yvar), aes(color = year)) +
        geom_point(alpha = 0.25) +
        labs(caption = "Data from the Center for Medicare and Medicaid Services",
@@ -180,6 +183,16 @@ server <- function(input, output) {
             y = paste(filter(feature_lookup, symbol==input$yvar)["name"]),
             title = "The Relationship Between Organizational Variables in the MSSP") +
        theme_minimal() 
+    
+    if(input$fit == TRUE) {
+      
+      p + geom_smooth(method = "lm", se = FALSE)
+      
+    } else {
+      
+      p
+      
+    }
      
    })
    
