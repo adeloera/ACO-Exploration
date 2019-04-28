@@ -13,6 +13,8 @@ library(shiny)
 library(shinyWidgets)
 library(shinythemes)
 library(sf)
+library(knitr)
+library(sjPlot)
 library(tidyverse)
 library(ggthemes)
 
@@ -94,9 +96,10 @@ ui <- fluidPage(
                     choices = feature_choices,
                     selected = "bnchmk_min_exp"),
           
-          checkboxInput("fit", "Fit a linear model?", FALSE)
+          checkboxInput("fit", 
+                        "Fit a linear model?", 
+                        FALSE)
           
-        
          ),
         
          conditionalPanel(
@@ -125,7 +128,9 @@ ui <- fluidPage(
       
                     tabPanel("Program Features", 
                              
-                             plotOutput("scatterfeatures")), 
+                             plotOutput("scatterfeatures"),
+                             
+                             htmlOutput("program_feature_stats")), 
       
       # The next tab will focus on variation at the county level with some plots and maps. 
       # This is where selecting program year will be relevant. 
@@ -196,6 +201,32 @@ server <- function(input, output) {
      
    })
    
+   output$program_feature_stats <- renderUI({
+     
+     if(input$fit == TRUE) {
+       
+       data <- aco_master
+       
+       model_input <- formula(paste(input$yvar, " ~ ", input$xvar))
+       
+       model <- lm(model_input, data)
+       
+       program_feature_table <- tab_model(model, 
+                                          pred.labels = c("Intercept", paste(filter(feature_lookup, symbol==input$xvar)["name"])), 
+                                          dv.labels = paste(filter(feature_lookup, symbol==input$yvar)["name"]))
+       
+       HTML(program_feature_table$knitr)
+       
+     } else {
+       
+       HTML("Check the box on the left to see a fitted linear model")
+       
+     }
+     
+     
+   })
+   
+   
    
    output$distPlot <- renderPlot({
      
@@ -249,7 +280,7 @@ server <- function(input, output) {
           caption = "Data from the Center for Medicare and Medicaid Services") +
      theme_minimal() +
      theme(legend.position = "none") +
-     scale_fill_manual(values = "green")
+     scale_fill_manual(values = "dark green")
      
    })
    
