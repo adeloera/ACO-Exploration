@@ -1,11 +1,8 @@
 #
-# This is a Shiny web application. You can run the application by clicking
-# the 'Run App' button above.
-#
-# Find out more about building applications with Shiny here:
-#
-#    http://shiny.rstudio.com/
-#
+# This is a Shiny web application made to explore public data on the Medicare Shared Savings Program.
+# Created by Andres de Loera-Brust for Gov 1005 in Spring 2019. 
+# You can run the application by clicking the 'Run App' button above.
+
 
 #I begin as always by loading in the libraries I will use
 
