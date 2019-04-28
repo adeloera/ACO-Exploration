@@ -7,9 +7,12 @@
 #    http://shiny.rstudio.com/
 #
 
+#I begin as always by loading in the libraries I will use
+
 library(shiny)
+library(shinyWidgets)
+library(shinythemes)
 library(sf)
-library(readr)
 library(tidyverse)
 library(ggthemes)
 
@@ -46,40 +49,66 @@ feature_lookup <-
 ui <- fluidPage(
    
    # Application title
+  
    titlePanel("Exploring ACO Participation"),
    
-   # Sidebar with an input selecter to select the year. 
+   # Here I setup the sidebar, which will have different selector options depending on the tab.
+   # Hence each selector input is preceded by a conditionalPanel argument. 
+   
    sidebarLayout(
       sidebarPanel(
         
-        selectInput("year",
-                    "Select Program Year",
+        conditionalPanel(
+          condition = "input.tabs == 'Background'",
+          
+          selectInput("year",
+                      "Select program year",
+                      choices = c(2014, 2015, 2016, 2017),
+                      selected = 2017,
+                      multiple = FALSE,
+                      selectize = TRUE)
+        ),
+        
+        
+        conditionalPanel(
+          condition = "input.tabs == 'County Variation'",
+          
+          selectInput("year",
+                    "Select program year",
                     choices = c(2014, 2015, 2016, 2017),
                     selected = 2017,
                     multiple = FALSE,
-                    selectize = TRUE),
+                    selectize = TRUE)
+         ),
         
-        selectInput('xvar', 
+        conditionalPanel(
+          condition = "input.tabs == 'Program Features'",
+          
+          selectInput('xvar', 
                     "Select x variable", 
                     choices = feature_choices,
                     selected = "service_length"),
         
-        selectInput('yvar', 
+          selectInput('yvar', 
                     "Select y variable", 
                     choices = feature_choices,
-                    selected = "bnchmk_min_exp"),
+                    selected = "bnchmk_min_exp")
         
-        selectInput("box1var",
+         ),
+        
+         conditionalPanel(
+           condition = "input.tabs == 'Entrance and Exit'",
+          
+           selectInput("violinvar",
                     "Select a variable to compare on",
                     choices = feature_choices,
                     selected = "earn_save_loss")
-        
-        ),
+        )),
       
       # The main panel will have several tabs.
       mainPanel(
         
-        tabsetPanel(type = "tabs",
+        tabsetPanel(id = "tabs",
                     
       # The first tab will have background information and some basic visualizations. 
                     
@@ -107,14 +136,14 @@ ui <- fluidPage(
       # The next tab will discuss entrance and exit in the MSSP program 
       # and compare program features on that axis.
       
-                    tabPanel("Entrace and Exit", 
+                    tabPanel("Entrance and Exit", 
                              plotOutput("enterbars"), 
                              
-                             plotOutput("enterboxplot"),
+                             plotOutput("enterviolin"),
                              
                              plotOutput("exitbars"),
                              
-                             plotOutput("exitboxplot"))
+                             plotOutput("exitviolin"))
         )
       )
    )
@@ -211,15 +240,15 @@ server <- function(input, output) {
      
    })
    
-   output$enterboxplot <- renderPlot({
+   output$enterviolin <- renderPlot({
      
      aco_master %>%
-       ggplot(aes_string(y = input$box1var, group = "entered", x = "entered")) +
+       ggplot(aes_string(y = input$violinvar, group = "entered", x = "entered")) +
        geom_violin(alpha = 0.25, fill = "green") + 
        scale_x_continuous(breaks = c(0, 1),
                           labels = c("Continuing", "Entering")) +
        labs(x = element_blank(),
-            y = paste(filter(feature_lookup, symbol==input$box1var)["name"]),
+            y = paste(filter(feature_lookup, symbol==input$violinvar)["name"]),
             title = "Organization features vary by continuing or entering status",
             caption = "Data from the Center for Medicare and Medicaid Services") +
        theme_minimal() +
@@ -243,15 +272,15 @@ server <- function(input, output) {
     
    })
    
-   output$exitboxplot <- renderPlot({
+   output$exitviolin <- renderPlot({
      
      aco_master %>%
-       ggplot(aes_string(y = input$box1var, group = "exit", x = "exit")) +
+       ggplot(aes_string(y = input$violinvar, group = "exit", x = "exit")) +
        geom_violin(alpha = 0.25, fill = "red")+
        scale_x_continuous(breaks = c(0, 1),
                           labels = c("Continuing", "Exiting")) +
        labs(x = element_blank(),
-            y = paste(filter(feature_lookup, symbol==input$box1var)["name"]),
+            y = paste(filter(feature_lookup, symbol==input$violinvar)["name"]),
             title = "Organization features vary by continuing or exiting status",
             caption = "Data from the Center for Medicare and Medicaid Services") +
        theme_minimal() +
