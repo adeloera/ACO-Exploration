@@ -50,7 +50,7 @@ ui <- fluidPage(
    
    # Application title
   
-   titlePanel("Exploring ACO Participation"),
+   titlePanel("Exploring the Medicare Shared Savings Program"),
    
    # Here I setup the sidebar, which will have different selector options depending on the tab.
    # Hence each selector input is preceded by a conditionalPanel argument. 
