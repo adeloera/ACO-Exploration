@@ -42,7 +42,22 @@ aco_choices <- tibble(
   "Log Number of ACO Beneficiaries" = "log_aco_benes",
   "ACO Participation Rate" = "aco_participation_rate")
 
-#I also create a way to look up the label of the variables so I can have reactive axes. 
+prominence_choices <- tibble(
+  "Number of ACO Beneficiaries" = "aco_benes",
+  "Log Number of ACO Beneficiaries" = "log_aco_benes",
+  "ACO Participation Rate" = "aco_participation_rate"
+)
+
+county_choices <- tibble(
+  "Fee For Service Beneficiaries" = "ffs_beneficiaries",
+  "Medicare Advantage Beneficiaries" = "ma_beneficiaries",
+  "Medicare Advantage Participation Rate" = "ma_participation_rate",
+  "Average Medicare Beneficiary Age" = "average_age",
+  "Total Medicare Costs" = "total_actual_costs",
+  "Average Costs per Beneficiary" = "actual_per_capita_costs"
+)
+
+#I also create a way to look up the label of the variables so I can have reactive labels 
 
 feature_lookup <- 
   feature_choices %>% 
@@ -51,6 +66,11 @@ feature_lookup <-
 aco_choice_lookup <- aco_choices %>%
   gather(name, symbol)
 
+prominence_lookup <- prominence_choices %>%
+  gather(name, symbol)
+
+county_lookup <- county_choices %>%
+  gather(name, symbol)
 
 # Define UI for application
 #The first argument defines the theme for the app, which I chose to be "spacelab" 
@@ -95,7 +115,17 @@ ui <- fluidPage(theme = shinytheme("spacelab"),
           selectInput("acovar",
                       "Select a variable to map",
                       choices = aco_choices, 
-                      selected = "log_aco_benes")
+                      selected = "log_aco_benes"),
+          
+          selectInput("county_x",
+                      "Select a measure of ACO prominence",
+                      choices = prominence_choices,
+                      selected = "aco_benes"),
+          
+          selectInput("county_y",
+                      "Select a county variable",
+                      choices = county_choices,
+                      selected = "actual_per_capita_costs")
          ),
         
         #On the program features panel I give choices for the x and y variables
@@ -163,7 +193,9 @@ ui <- fluidPage(theme = shinytheme("spacelab"),
                              
                              plotOutput("penePlot"),
                              
-                             plotOutput("countymap")),
+                             plotOutput("countymap"),
+                             
+                             plotOutput("participationPlot")),
       
       # The next tab will discuss entrance and exit in the MSSP program 
       # and compare program features on that axis.
@@ -241,7 +273,7 @@ server <- function(input, output) {
     if(input$fit == TRUE) {
       
       
-      p + geom_smooth(method = "lm", se = FALSE)
+      p + geom_smooth(method = "lm", se = TRUE)
       
     } else {
       
@@ -344,7 +376,23 @@ server <- function(input, output) {
      
    })
    
-   #HereI make a bar chart of program entrances by year.
+   output$participationPlot <- renderPlot({
+     
+     county_master %>%
+       filter(year == input$year) %>%
+       ggplot(aes_string(x = input$county_x, y =input$county_y)) +
+       geom_point() +
+       geom_smooth(method = "lm", se = FALSE) +
+       labs(title = "MSSP prominence compared with other Medicare variables",
+            subtitle = paste(filter(prominence_lookup, symbol==input$county_x)["name"], "vs", filter(county_lookup, symbol==input$county_y)["name"], "in", input$year),
+            x = paste(filter(prominence_lookup, symbol==input$county_x)["name"]),
+            y = paste(filter(county_lookup, symbol==input$county_y)["name"]),
+            caption = "Data from the Center for Medicare and Medicaid Services") +
+       theme_economist_white()
+     
+   })
+   
+   #Here I make a bar chart of program entrances by year.
    
    output$enterbars <- renderPlot({
      
