@@ -12,6 +12,7 @@ library(shinythemes)
 library(sf)
 library(knitr)
 library(sjPlot)
+library(scales)
 library(tidyverse)
 library(ggthemes)
 
@@ -71,7 +72,7 @@ ui <- fluidPage(theme = shinytheme("spacelab"),
         conditionalPanel(
           condition = "input.tabs == 'Background'",
           
-          selectInput("year",
+          selectInput("year_1",
                       "Select program year",
                       choices = c(2014, 2015, 2016, 2017),
                       selected = 2017,
@@ -141,7 +142,9 @@ ui <- fluidPage(theme = shinytheme("spacelab"),
                              
                              verbatimTextOutput("summary"), 
                              
-                             plotOutput("yearbars")),
+                             plotOutput("yearbars"),
+                             
+                             plotOutput("saveplot")),
       
       # The next tab will present the relationship between various organizational variables. 
       
@@ -202,6 +205,21 @@ server <- function(input, output) {
      
    })
    
+   output$saveplot <- renderPlot({
+     
+     aco_master %>%
+       filter(year == input$year_1) %>%
+       ggplot(aes(x = gen_save_loss, fill = "blue")) +
+       geom_density(alpha = 0.5) +
+       labs(x = "Savings/Losses Generated",
+            y = "Density of ACOs",
+            title = paste("Savings and Losses Generated in the MSSP in", input$year_1),
+            caption = "Data from the Center for Medicare and Medicaid Services") +
+       theme_economist_white() +
+       theme(legend.position = "none") + 
+       scale_fill_manual(values = "blue") +
+       scale_x_continuous(labels = dollar)
+   })
    
    output$scatterfeatures <- renderPlot({
      
@@ -276,7 +294,7 @@ server <- function(input, output) {
                           labels = c("0.0", "0.1", "0.2", "0.3", "0.4", "0.5")) +
        labs(x = "ACO beneficiaries in county (Log base 10)",
             y = "Density of Counties",
-            title = "The count of MSSP beneficiaires by county",
+            title = paste("The distribution of MSSP beneficiaires by county in", input$year),
             caption = "Data from the Center for Medicare and Medicaid Services") +
        theme_economist_white() +
        theme(legend.position = "none") +
@@ -294,7 +312,7 @@ server <- function(input, output) {
        geom_density() +
        labs(x = "ACO participation rate in county",
             y = "Density of Counties",
-            title = "The distribution of MSSP participation by county",
+            title = paste("The distribution of MSSP participation rates by county in", input$year),
             caption = "Data from the Center for Medicare and Medicaid Services") +
        theme_economist_white() +
        theme(legend.position = "none") +
@@ -313,7 +331,7 @@ server <- function(input, output) {
        ggplot(aes_string(fill = input$acovar)) +
        geom_sf() +
        labs(title = "Distribution of the Medicare Shared Savings Program by county",
-            subtitle = paste(filter(aco_choice_lookup, symbol==input$acovar)["name"], " by county in ", input$year),
+            subtitle = paste(filter(aco_choice_lookup, symbol==input$acovar)["name"], "by county in", input$year),
             caption = "Data from the Center for Medicare and Medicaid Services",
             fill = paste(filter(aco_choice_lookup, symbol==input$acovar)["name"])) +
        theme_economist_white() +
