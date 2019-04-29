@@ -324,6 +324,13 @@ county_medicare_2014 <- read_excel("State County All Table 2017.xlsx",
 #Here I download the ACO level datasets with more detailed program paramenters 
 #from the CMS website and perform some basic cleaning. 
 
+#To create a length of service variable I will use four date variables I will create here.
+
+date2017 <- as.Date("2018/01/01")
+date2016 <- as.Date("2017/01/01")
+date2015 <- as.Date("2016/01/01")
+date2014 <- as.Date("2015/01/01")
+
 #I begin with the 2017 dataset. 
 #I read in the dataset from a url of CMS's data download site. I use col_names and deliberately set the format of some of the columns. 
 
@@ -360,7 +367,7 @@ aco_data_2017 <- read_csv("https://data.cms.gov/api/views/gk7c-vejx/rows.csv?acc
   #Next I reformat the intital start time variable as a date and creating a "length of service" variable. 
   
   mutate(initial_start_date = as.Date(initial_start_date, format = "%m/%d/%Y"),
-         service_length = Sys.Date()-initial_start_date,
+         service_length = date2017-initial_start_date,
          
   #Critically, I also add a year variable. 
   
@@ -402,7 +409,7 @@ aco_data_2016 <- read_csv("https://data.cms.gov/api/views/3jk5-q6dr/rows.csv?acc
   #Next I reformat the intital start time variable as a date and creating a "length of service" variable. 
   
   mutate(initial_start_date = as.Date(initial_start_date, format = "%m/%d/%Y"),
-         service_length = Sys.Date()-initial_start_date,
+         service_length = date2016-initial_start_date,
          
   #Critically, I also add a year variable. 
   
@@ -433,7 +440,7 @@ aco_data_2015 <- read_csv("https://data.cms.gov/api/views/7rrf-3gxr/rows.csv?acc
   #Next I reformat the intital start time variable as a date and creating a "length of service" variable. 
   
   mutate(initial_start_date = as.Date(start_date, format = "%m/%d/%Y"),
-         service_length = Sys.Date()-initial_start_date,
+         service_length = date2016-initial_start_date,
          
   #Critically, I also add a year variable. 
   
@@ -468,7 +475,7 @@ aco_data_2014 <- read_csv("https://data.cms.gov/api/views/888h-akbg/rows.csv?acc
   #Next I reformat the intital start time variable as a date and creating a "length of service" variable. 
   
   mutate(initial_start_date = as.Date(start_date, format = "%m/%d/%Y"),
-         service_length = Sys.Date()-initial_start_date,
+         service_length = date2015-initial_start_date,
          
   #Critically, I also add a year variable. 
   
