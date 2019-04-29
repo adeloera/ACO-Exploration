@@ -607,7 +607,7 @@ temp_2017 <- county_lvl_aco_2017 %>%
   #Next I just select the data I want.
   
   ungroup() %>%
-  select(state_name, county_name, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, aco_benes, year, geometry) %>%
+  select(state_name, county_name, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, aco_benes, average_age, total_actual_costs, actual_per_capita_costs, year, geometry) %>%
   
   #Then I create MA and ACO participation rate variables. 
   
@@ -635,7 +635,7 @@ temp_2016 <- county_lvl_aco_2016 %>%
   #Next I just select the data I want.
   
   ungroup() %>%
-  select(state_name, county_name, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, aco_benes, year, geometry) %>%
+  select(state_name, county_name, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, aco_benes, average_age, total_actual_costs, actual_per_capita_costs, year, geometry) %>%
   
   #Then I create MA and ACO participation rate variables. 
   
@@ -662,7 +662,7 @@ temp_2015 <- county_lvl_aco_2015 %>%
   #Next I just select the data I want.
   
   ungroup() %>%
-  select(state_name, county_name, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, aco_benes, year, geometry) %>%
+  select(state_name, county_name, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, aco_benes, average_age, total_actual_costs, actual_per_capita_costs, year, geometry) %>%
   
   #Then I create MA and ACO participation rate variables. 
   
@@ -689,7 +689,7 @@ temp_2014 <- county_lvl_aco_2014 %>%
   #Next I just select the data I want.
   
   ungroup() %>%
-  select(state_name, county_name, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, aco_benes, year, geometry) %>%
+  select(state_name, county_name, state_and_county_fips_code, beneficiaries_with_part_a_and_part_b, ffs_beneficiaries, ma_beneficiaries, aco_benes, average_age, total_actual_costs, actual_per_capita_costs, year, geometry) %>%
   
   #Then I create MA and ACO participation rate variables and add a logged aco_beneficiaries variable. 
   
