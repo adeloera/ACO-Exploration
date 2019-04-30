@@ -125,7 +125,11 @@ ui <- fluidPage(theme = shinytheme("spacelab"),
           selectInput("county_y",
                       "Select a county variable",
                       choices = county_choices,
-                      selected = "actual_per_capita_costs")
+                      selected = "actual_per_capita_costs"),
+          
+          checkboxInput("fit2", 
+                        "Fit a linear model?", 
+                        FALSE)
          ),
         
         #On the program features panel I give choices for the x and y variables
@@ -199,7 +203,9 @@ ui <- fluidPage(theme = shinytheme("spacelab"),
                              
                              plotOutput("countymap"),
                              
-                             plotOutput("participationPlot")),
+                             plotOutput("participationPlot"),
+                             
+                             htmlOutput("participation_stats")),
       
       # The next tab will discuss entrance and exit in the MSSP program 
       # and compare program features on that axis.
@@ -343,7 +349,6 @@ server <- function(input, output) {
     
     if(input$fit == TRUE) {
       
-      
       p + geom_smooth(method = "lm", se = TRUE)
       
     } else {
@@ -449,17 +454,46 @@ server <- function(input, output) {
    
    output$participationPlot <- renderPlot({
      
-     county_master %>%
+     g <- county_master %>%
        filter(year == input$year) %>%
        ggplot(aes_string(x = input$county_x, y =input$county_y)) +
        geom_point() +
-       geom_smooth(method = "lm", se = FALSE) +
        labs(title = "MSSP prominence compared with other Medicare variables",
             subtitle = paste(filter(prominence_lookup, symbol==input$county_x)["name"], "vs", filter(county_lookup, symbol==input$county_y)["name"], "in", input$year),
             x = paste(filter(prominence_lookup, symbol==input$county_x)["name"]),
             y = paste(filter(county_lookup, symbol==input$county_y)["name"]),
             caption = "Data from the Center for Medicare and Medicaid Services") +
        theme_economist_white()
+     
+     if(input$fit2 == TRUE) {
+       g + geom_smooth(method = "lm", se = TRUE)
+     } else {
+       g
+     }
+       
+   })
+   
+   output$participation_stats <- renderUI({
+     
+     if(input$fit2 == TRUE) {
+       
+       data <- county_master
+       
+       model_input <- formula(paste(input$county_y, " ~ ", input$county_x))
+       
+       model <- lm(model_input, data)
+       
+       participation_table <- tab_model(model, 
+                                          pred.labels = c("Intercept", paste(filter(prominence_lookup, symbol==input$county_x)["name"])), 
+                                          dv.labels = paste(filter(county_lookup, symbol==input$county_y)["name"]))
+       
+       HTML(participation_table$knitr)
+       
+     } else {
+       
+       HTML("Check the box on the left to see a fitted linear model")
+       
+     }
      
    })
    
