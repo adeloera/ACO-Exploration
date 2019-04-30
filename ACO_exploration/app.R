@@ -292,13 +292,13 @@ server <- function(input, output) {
      about14 <- p("-Entering and exiting ACOs have smaller beneficiary populations than continuing. ")
      
      about15 <- h3(strong("Data Sources"))
-     about16 <- p("-Detailed ACO-level data comes from Shared Savings Program Accountable Care Organizations (ACO) Public-Use Files, made available by CMS", tags$a(href="https://www.cms.gov/Research-Statistics-Data-and-Systems/Downloadable-Public-Use-Files/SSPACO/index.html", "here"), ".")
-     about17 <- p("-County-level ACO beneficiary data comes from the Number of ACO Assigned Beneficiaries by County Public-Use Files, available in as part of the Shared Savings Program Benchmark Rebasing PUFs found", tags$a(href="https://www.cms.gov/Research-Statistics-Data-and-Systems/Downloadable-Public-Use-Files/SSPACO/SSP_Benchmark_Rebasing.html", "here"), ".")
-     about18 <- p("-County-level Medicare data comes from the State/County Table on All Beneficiaries in the Medicare Geographic Variation Public Use Files found", tags$a(href="https://www.cms.gov/Research-Statistics-Data-and-Systems/Statistics-Trends-and-Reports/Medicare-Geographic-Variation/GV_PUF.html", "here"), ".")
-     about19 <- p("-The US county map shapefile comes from the Census Bureau’s Cartographic Boundary Files, available", tags$a(href="https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.2016.html", "here"), ".")
+     about16 <- p("-Detailed ACO-level data comes from Shared Savings Program Accountable Care Organizations (ACO) Public-Use Files, made available by CMS", tags$a(href="https://www.cms.gov/Research-Statistics-Data-and-Systems/Downloadable-Public-Use-Files/SSPACO/index.html", "here."))
+     about17 <- p("-County-level ACO beneficiary data comes from the Number of ACO Assigned Beneficiaries by County Public-Use Files, available in as part of the Shared Savings Program Benchmark Rebasing PUFs found", tags$a(href="https://www.cms.gov/Research-Statistics-Data-and-Systems/Downloadable-Public-Use-Files/SSPACO/SSP_Benchmark_Rebasing.html", "here."))
+     about18 <- p("-County-level Medicare data comes from the State/County Table on All Beneficiaries in the Medicare Geographic Variation Public Use Files found", tags$a(href="https://www.cms.gov/Research-Statistics-Data-and-Systems/Statistics-Trends-and-Reports/Medicare-Geographic-Variation/GV_PUF.html", "here."))
+     about19 <- p("-The US county map shapefile comes from the Census Bureau’s Cartographic Boundary Files, available", tags$a(href="https://www.census.gov/geographies/mapping-files/time-series/geo/carto-boundary-file.2016.html", "here."))
      
      about20 <- h3(strong("Source Code"))
-     about21 <- p("View the source code ", tags$a(href="https://github.com/adeloera/MSSP-Explorer", "here"), ".")
+     about21 <- p("View the source code ", tags$a(href="https://github.com/adeloera/MSSP-Explorer", "here."))
        
        
           
