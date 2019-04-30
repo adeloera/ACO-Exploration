@@ -210,6 +210,8 @@ county_medicare_2017 <- read_excel("State County All Table 2017.xlsx",
          average_age = replace_na(average_age, 0),
          actual_per_capita_costs = as.numeric(actual_per_capita_costs),
          actual_per_capita_costs = replace_na(actual_per_capita_costs, 0),
+         total_actual_costs = as.numeric(total_actual_costs),
+         total_actual_costs = replace_na(total_actual_costs, 0),
          ffs_beneficiaries = as.numeric(ffs_beneficiaries),
          ffs_beneficiaries = replace_na(ffs_beneficiaries, 0)) %>%
   
@@ -245,6 +247,8 @@ county_medicare_2016 <- read_excel("State County All Table 2017.xlsx",
          average_age = replace_na(average_age, 0),
          actual_per_capita_costs = as.numeric(actual_per_capita_costs),
          actual_per_capita_costs = replace_na(actual_per_capita_costs, 0),
+         total_actual_costs = as.numeric(total_actual_costs),
+         total_actual_costs = replace_na(total_actual_costs, 0),
          ffs_beneficiaries = as.numeric(ffs_beneficiaries),
          ffs_beneficiaries = replace_na(ffs_beneficiaries, 0)) %>%
   
@@ -279,6 +283,8 @@ county_medicare_2015 <- read_excel("State County All Table 2017.xlsx",
          average_age = replace_na(average_age, 0),
          actual_per_capita_costs = as.numeric(actual_per_capita_costs),
          actual_per_capita_costs = replace_na(actual_per_capita_costs, 0),
+         total_actual_costs = as.numeric(total_actual_costs),
+         total_actual_costs = replace_na(total_actual_costs, 0),
          ffs_beneficiaries = as.numeric(ffs_beneficiaries),
          ffs_beneficiaries = replace_na(ffs_beneficiaries, 0)) %>%
   
@@ -313,6 +319,8 @@ county_medicare_2014 <- read_excel("State County All Table 2017.xlsx",
          average_age = replace_na(average_age, 0),
          actual_per_capita_costs = as.numeric(actual_per_capita_costs),
          actual_per_capita_costs = replace_na(actual_per_capita_costs, 0),
+         total_actual_costs = as.numeric(total_actual_costs),
+         total_actual_costs = replace_na(total_actual_costs, 0),
          ffs_beneficiaries = as.numeric(ffs_beneficiaries),
          ffs_beneficiaries = replace_na(ffs_beneficiaries, 0)) %>%
   
