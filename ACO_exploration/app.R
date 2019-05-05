@@ -438,6 +438,66 @@ server <- function(input, output) {
      
    })
    
+   #Here I make all the outputs for the Entry and Exit tab.
+   #That begins with a text output with the description of the tab. 
+   
+   output$entryexit <- renderUI({
+     
+     entryexit1 <- h3(strong("How are entering and exiting ACOs unique?"))
+     
+     entryexit2 <- p("This tab allows you to explore entrance and exit in the Medicare Shared Savings Program. You can select which state you’d like to consider and then which organizational variable you would like to compare on. If you select to compare “Entered” and “Not Entered” ACOs, the left hand violin plot will show the distribution of the selected variable for ACO years which are not the first year of an ACOs participation in the program and the right hand side will show the selected distribution for ACO years which are the first year of an ACOs participation in the program. If you select to compare “Exit” and “Not Exit” ACOs, the left hand violin plot will show the distribution of the selected variable for ACO years which are not the last year of an ACOs participation in the program and the right hand side will show the selected distribution for ACO years which are the last year of an ACOs participation in the program. The organizational variables you can choose to compare are defined the same way as detailed on the “Program Features” tab.")
+     
+     HTML(paste(entryexit1, entryexit2))
+       
+   })
+   
+   #Here I make a bar chart of program entrances or exits by year.
+   
+   output$bars <- renderPlot({
+     
+     aco_master %>%
+       filter(eval(parse(text=input$statevar)) == 1) %>%
+       ggplot(aes(x = year, fill = "blue")) +
+       geom_bar() +
+       labs(x = "Year",
+            y = paste("Number of ACOs that", filter(state_lookup, symbol==input$statevar)["name"]),
+            title = "MSSP Churn by Year",
+            caption = "Data from the Center for Medicare and Medicaid Services") +
+       theme_economist_white() +
+       theme(legend.position = "none") +
+       scale_fill_manual(values = "light blue")
+     
+   })
+   
+   #Here I make a reactive violin plot where the variable of analysis is selected by the user.
+   
+   output$violin <- renderPlot({
+     
+     aco_master %>%
+       ggplot(aes_string(y = input$violinvar, group = input$statevar, x = input$statevar)) +
+       geom_violin(alpha = 0.25, fill = "blue") + 
+       scale_x_continuous(breaks = c(0, 1),
+                          labels = c(paste("Not", paste(filter(state_lookup, symbol==input$statevar)["name"])), paste(filter(state_lookup, symbol==input$statevar)["name"]))) +
+       labs(x = element_blank(),
+            y = paste(filter(feature_lookup, symbol==input$violinvar)["name"]),
+            title = "Organization features vary by continuing, exiting or entering status",
+            caption = "Data from the Center for Medicare and Medicaid Services") +
+       theme_economist_white() +
+       scale_fill_manual(values = "dark blue")
+     
+   })
+   
+   #Now I define the outputs for the county variation tab. 
+   #That begins with the descriptive text outputs. 
+   
+   output$participation1 <- renderUI({
+     
+   })
+   
+   output$participation2 <- renderUI({
+     
+   })
+   
    #Here I make a density plot of ACO prominence measures by county. 
    #I set the axes deliberately to get an appealing and interpretable chart. 
    #I also set the labels, color and theme for asthetic appeal. 
@@ -457,7 +517,6 @@ server <- function(input, output) {
        scale_fill_manual(values = "light blue")
      
    })
-   
    
    #Here I create a map of the counties in the contiguous united states, filled by ACO beneficiaries.
    #The user gets to set the year prsented and the subtitle will respond to the users selection.
@@ -525,42 +584,6 @@ server <- function(input, output) {
        HTML("Check the box on the left to see a fitted linear model")
        
      }
-     
-   })
-   
-   #Here I make a bar chart of program entrances or exits by year.
-   
-   output$bars <- renderPlot({
-     
-     aco_master %>%
-     filter(eval(parse(text=input$statevar)) == 1) %>%
-     ggplot(aes(x = year, fill = "blue")) +
-     geom_bar() +
-     labs(x = "Year",
-          y = paste("Number of ACOs that", filter(state_lookup, symbol==input$statevar)["name"]),
-          title = "MSSP Churn by Year",
-          caption = "Data from the Center for Medicare and Medicaid Services") +
-     theme_economist_white() +
-     theme(legend.position = "none") +
-     scale_fill_manual(values = "light blue")
-     
-   })
-   
-   #Here I make a reactive violin plot where the variable of analysis is selected by the user.
-   
-   output$violin <- renderPlot({
-     
-     aco_master %>%
-       ggplot(aes_string(y = input$violinvar, group = input$statevar, x = input$statevar)) +
-       geom_violin(alpha = 0.25, fill = "blue") + 
-       scale_x_continuous(breaks = c(0, 1),
-                          labels = c("Continuing", paste(filter(state_lookup, symbol==input$statevar)["name"]))) +
-       labs(x = element_blank(),
-            y = paste(filter(feature_lookup, symbol==input$violinvar)["name"]),
-            title = "Organization features vary by continuing, exiting or entering status",
-            caption = "Data from the Center for Medicare and Medicaid Services") +
-       theme_economist_white() +
-       scale_fill_manual(values = "dark blue")
      
    })
 
