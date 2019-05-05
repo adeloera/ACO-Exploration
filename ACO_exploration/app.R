@@ -369,6 +369,7 @@ server <- function(input, output) {
        #I set the fill color to dark blue for aesthetics.
        
        scale_fill_manual(values = "dark blue") 
+
    })
    
    #Here I complete the descriptive text found on the background tab. 
