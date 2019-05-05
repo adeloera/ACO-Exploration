@@ -1,6 +1,6 @@
 #
 # This is a Shiny web application made to explore public data on the Medicare Shared Savings Program.
-# Created by Andres de Loera-Brust for Gov 1005 in Spring 2019. 
+# Created by Andres de Loera-Brust in the Spring of 2019. 
 # You can run the application by clicking the 'Run App' button above.
 
 
@@ -317,7 +317,7 @@ server <- function(input, output) {
        theme_economist_white() +
        theme(legend.position = "none") + 
        scale_fill_manual(values = "blue") +
-       scale_x_continuous(labels = dollar)
+       scale_x_continuous()
    })
    
    output$description2 <- renderUI({
@@ -335,9 +335,8 @@ server <- function(input, output) {
      about14 <- p("-Entering and exiting ACOs have smaller beneficiary populations than continuing. ")
      
        
-          
      HTML(paste(br(),
-                about5, br(),
+                about5, 
                 about6, 
                 about7, 
                 about8, 
