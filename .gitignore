@@ -11,6 +11,9 @@ Dictionary.*
 *.prj
 *.xml
 *.shx
+*.shp
+*.csv
+*.xlsx
 workspace.R
 
 april_5_milestone*
