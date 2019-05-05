@@ -492,9 +492,20 @@ server <- function(input, output) {
    
    output$participation1 <- renderUI({
      
+     participation1_1 <- h3(strong("How does assignment to ACOs vary across the country?"))
+     
+     participation1_2 <- p("This tab allows you to explore how the prominence of the Medicare Shared Savings Program varies across the country and how it relates to other regional Medicare data. The first two plots allow you to select year and a measure of ACO prominence and see its distribution on a density plot and a map. The two measures here are the (log base 10) number of ACO beneficiaries in a county and the ACO participation rate, defines as the proportion of Medicare beneficiaries in the county assigned to an ACO. ")
+     
+     HTML(paste(participation1_1,
+          participation1_2))
+       
    })
    
    output$participation2 <- renderUI({
+     
+     participation2_1 <- p("The scatterplot below allows you to visualize how measures of ACO prominence relate to other county level Medicare variables, with the choice to fit a linear model. For measures of ACO prominence on the X axis you have the choice of Log Number of ACO Beneficiaries and ACO Participation Rate, as above, but also the choice to see the raw Number of ACO Beneficiaries. For the Y axis you can select from the following variables: The number of Medicare beneficiaries in the “standard” Medicare Fee for Service plan in the county, the number of Medicare beneficiaries in Medicare Advantage plans in the county, the Medicare Advantage participation rate in the county, the average age of Medicare beneficiaries in the county, the total Medicare costs in the county, and the average costs for a Medicare beneficiary in the county. ")
+     
+     HTML(paste(participation2_1))
      
    })
    
@@ -610,7 +621,7 @@ server <- function(input, output) {
                 about_6,
                 about_7, br(),
                 about_8,
-                about_9), br())
+                about_9, br()))
      
    })
    
