@@ -122,11 +122,11 @@ ui <- fluidPage(theme = shinytheme("spacelab"),
           condition = "input.tabs == 'County Variation'",
           
           selectInput("year",
-                    "Select program year",
-                    choices = c(2014, 2015, 2016, 2017),
-                    selected = 2017,
-                    multiple = FALSE,
-                    selectize = TRUE),
+                      "Select program year",
+                      choices = c(2014, 2015, 2016, 2017),
+                      selected = 2017,
+                      multiple = FALSE,
+                      selectize = TRUE),
           
           selectInput("acovar",
                       "Select a variable to graph and map",
@@ -148,7 +148,7 @@ ui <- fluidPage(theme = shinytheme("spacelab"),
                         FALSE)
          ),
         
-        #On the program features panel I give choices for the x and y variables
+        #On the program features panel I give choices for the x and y variables.
         #I also add a box that can be checked to add a fitted line. 
         
         conditionalPanel(
@@ -170,7 +170,8 @@ ui <- fluidPage(theme = shinytheme("spacelab"),
           
          ),
         
-        #On the entrance and exit panel I give the user the choice of what variables to consider. 
+        #On the entrance and exit panel I give the user the choice of what variables to consider
+        #And whether they want to look at entry or exit. 
         
          conditionalPanel(
            condition = "input.tabs == 'Entrance and Exit'",
@@ -192,15 +193,19 @@ ui <- fluidPage(theme = shinytheme("spacelab"),
         
         tabsetPanel(id = "tabs",
                     
-      # The first tab will have background information and some basic visualizations. 
+      # The first tab will have background information and some basic visualizations.  
                     
                     tabPanel("Background", 
                              
                              htmlOutput("background"), 
                              
+                             #The first visualization is a bar graph of program participation by year.
+                             
                              plotOutput("yearbars"),
                              
                              htmlOutput("description1"), 
+                             
+                             #The second visualization is a flexible density plot. 
                              
                              plotOutput("flexplot"),
                              
@@ -255,16 +260,16 @@ ui <- fluidPage(theme = shinytheme("spacelab"),
                              htmlOutput("about"))
       
 
-        )
-      )
-   )
-)
+        ))))
 
 
-# Define server logic required for the app.
+# Here I define the server logic required for the app.
 
 server <- function(input, output) {
   
+  # I write the code for the output in order of the tabs.
+  
+  # This chunk begins the text description on the Background tab.
   
   output$background <- renderUI({
     
@@ -276,23 +281,44 @@ server <- function(input, output) {
     
   })
   
-  #Here I make a simple bar chart showing the number of MSSP Participating ACOs every year. 
-  #The additional arguments just set the labels, theme and color. 
+  # Here I make a simple bar chart showing the number of MSSP Participating ACOs every year. 
+  # The additional arguments just set the labels, theme and color. 
   
    output$yearbars <- renderPlot({
      
+     #I start with the ACO level master file.
      aco_master %>%
+       
+       #The x axis is naturally the year. Since it's a bar chart I need no y variable.
+       
        ggplot(aes(x = year, fill = "blue")) +
+       
+       #I call geom_bar() to make a barchart. 
+       
        geom_bar() +
+       
+       #I add labels to describe the plot.
+       
        labs(x = "Year",
             y = "Number of ACOs",
             title = "MSSP Participation by Year",
             caption = "Data from the Center for Medicare and Medicaid Services") +
-       theme_economist_white() +
+       
+       #As a lover of The Economist magazine, I use the theme that replicates their style for my plots.
+       
+       theme_economist() +
+       
+       #I eliminate the unnecessary legend. 
+       
        theme(legend.position = "none") +
-       scale_fill_manual(values = "blue")
+       
+       #I want to make the color in the app various shades of blue, so I set the fill color to blue.
+       
+       scale_fill_manual(values = "dark blue")
      
    })
+   
+   # Here I continue the descriptive text found on the Background tab. 
    
    output$description1 <- renderUI({
      
@@ -304,21 +330,49 @@ server <- function(input, output) {
      
    })
    
+   # Here I create the density plot output on the Background tab. 
+   
    output$flexplot <- renderPlot({
      
+     #I start with the ACO level master dataset. 
+     
      aco_master %>%
+       
+       #I filter by the selected year. 
+       
        filter(year == input$year_1) %>%
+       
+       #I set the x variable to be responsive to the user's input. 
+       #No y variable is needed for a density plot.
+       
        ggplot(aes_string(x = input$orgvar, fill = '"blue"')) +
-       geom_density(alpha = 0.5) +
+       
+       #I call geom_density to make a density plot. 
+       
+       geom_density(alpha = 0.75) +
+       
+       #I define the labels and titles to respond to user input using the clear version of the variable name.
+       
        labs(x = paste(filter(feature_lookup, symbol==input$orgvar)["name"]),
             y = "Density of ACOs",
             title = paste(filter(feature_lookup, symbol==input$orgvar)["name"], "for MSSP ACOs in", input$year_1),
             caption = "Data from the Center for Medicare and Medicaid Services") +
-       theme_economist_white() +
+       
+       #I set the theme to emulate the economist.
+       
+       theme_economist() +
+       
+       #I remove an unnecessary legend.
+       
        theme(legend.position = "none") + 
-       scale_fill_manual(values = "blue") +
-       scale_x_continuous()
+       
+       #I set the fill color to blue for aesthetics.
+       
+       scale_fill_manual(values = "blue") 
    })
+   
+   #Here I complete the descriptive text found on the background tab. 
+   #This is more complicated, in that I use more lines, because of the bullet poiting.
    
    output$description2 <- renderUI({
      
@@ -349,6 +403,9 @@ server <- function(input, output) {
                 ))
      
    })
+   
+   #Now I turn to the "Program Features" tab.
+   #I begin by creating the text description, which describes each variable available for selection.
    
    output$features <- renderUI({
      
@@ -382,29 +439,48 @@ server <- function(input, output) {
      
    })
    
+   #Here I create a scatterplot of the two user-selected variables.
+   #I also create the possibility of a fitted linear model.
+   
    output$scatterfeatures <- renderPlot({
      
-     #Here I create a scatterplot of the two user-selected variables. 
-     #The label arguments are set such that the labels will change to respond to the users selection. 
+     #First I define what the base scatterplot will be like, with or without the fitted line. 
+     #That starts with the ACO level data.
      
     p <- aco_master %>%
+      
+      #I allow the user to select x and y variables. 
+      
        ggplot(aes_string(x = input$xvar, y = input$yvar)) +
+      
+      #I call geom_point to make a scatter plot 
+      #I also set the alpha low so one can see the clustering of points.
+      
        geom_point(alpha = 0.25) +
+      
+      #I set the labels and title here. The axes labels are defined to be reactive to user input.
+      
        labs(caption = "Data from the Center for Medicare and Medicaid Services",
             color = "Colored by Year",
             x = paste(filter(feature_lookup, symbol==input$xvar)["name"]),
             y = paste(filter(feature_lookup, symbol==input$yvar)["name"]),
             title = "The Relationship Between Organizational Variables in the MSSP") +
-       theme_economist_white() 
+      
+      #I emulate the economist's style here again. 
+      
+       theme_economist() 
     
     #I also add a linear fit if the user selects it. 
+    #If the user selects to fit the line, I add a geom_smooth argument. 
     
     if(input$fit == TRUE) {
       
       p + geom_smooth(method = "lm", se = TRUE)
       
-    } else {
+    #Otherwise,  simply display the base scatterplot. 
       
+    } else {
+    
       p
       
     }
@@ -418,19 +494,31 @@ server <- function(input, output) {
      
      if(input$fit == TRUE) {
        
+       #I use the ACO level data
+       
        data <- aco_master
+       
+       #Then define the shape of the formula
        
        model_input <- formula(paste(input$yvar, " ~ ", input$xvar))
        
+       #Run the formula and save the resulting model.
+       
        model <- lm(model_input, data)
+       
+       #Then output the model parameters as a table.
        
        program_feature_table <- tab_model(model, 
                                           pred.labels = c("Intercept", paste(filter(feature_lookup, symbol==input$xvar)["name"])), 
                                           dv.labels = paste(filter(feature_lookup, symbol==input$yvar)["name"]))
        
+       #Finally I display the table as an HTML output
+       
        HTML(program_feature_table$knitr)
        
      } else {
+       
+       #If the user does not check to see a fitted model, they will instead be told how to do so. 
        
        HTML("Check the box on the left to see a fitted linear model")
        
@@ -455,17 +543,37 @@ server <- function(input, output) {
    
    output$bars <- renderPlot({
      
+     #I start with the ACO level data.
+     
      aco_master %>%
+       
+       #I filter by the selected status variable.
+       
        filter(eval(parse(text=input$statevar)) == 1) %>%
+       
+       #Then I set the x axis to the year and call geom_bar to make a bar chart.
+       
        ggplot(aes(x = year, fill = "blue")) +
        geom_bar() +
+       
+       #Here I title the graph and make responsive labels. 
+       
        labs(x = "Year",
             y = paste("Number of ACOs that", filter(state_lookup, symbol==input$statevar)["name"]),
             title = "MSSP Churn by Year",
             caption = "Data from the Center for Medicare and Medicaid Services") +
-       theme_economist_white() +
+       
+       #I set the theme to emulate the economist. 
+       
+       theme_economist() +
+       
+       #I remove a useless legend.
+       
        theme(legend.position = "none") +
-       scale_fill_manual(values = "light blue")
+       
+       #And finally I set the color to a blue.
+       
+       scale_fill_manual(values = "dark blue")
      
    })
    
@@ -473,17 +581,37 @@ server <- function(input, output) {
    
    output$violin <- renderPlot({
      
+     #I use the ACO level data
+     
      aco_master %>%
+       
+       #Set the variables to be responsive to user input.
+       
        ggplot(aes_string(y = input$violinvar, group = input$statevar, x = input$statevar)) +
-       geom_violin(alpha = 0.25, fill = "blue") + 
+       
+       #I call geom_violin to make a violin plot, and set alpha and fill for asthetics.
+       
+       geom_violin(alpha = 0.75, fill = "blue") + 
+       
+       #I set the x axis and tick labels to get appealing formating. 
+       
        scale_x_continuous(breaks = c(0, 1),
                           labels = c(paste("Not", paste(filter(state_lookup, symbol==input$statevar)["name"])), paste(filter(state_lookup, symbol==input$statevar)["name"]))) +
+       
+       #I set labels and titles with reactivity to user selection. 
+       
        labs(x = element_blank(),
             y = paste(filter(feature_lookup, symbol==input$violinvar)["name"]),
             title = "Organization features vary by continuing, exiting or entering status",
             caption = "Data from the Center for Medicare and Medicaid Services") +
-       theme_economist_white() +
-       scale_fill_manual(values = "dark blue")
+       
+       #I set a theme emulating the economist. 
+       
+       theme_economist() +
+       
+       #Finally I set the fill color to a blue.
+       
+       scale_fill_manual(values = "blue")
      
    })
    
@@ -510,40 +638,74 @@ server <- function(input, output) {
    })
    
    #Here I make a density plot of ACO prominence measures by county. 
-   #I set the axes deliberately to get an appealing and interpretable chart. 
-   #I also set the labels, color and theme for asthetic appeal. 
    
    output$distPlot <- renderPlot({
      
+     #For this I use the county level master data.
+     
      county_master %>%
+       
+       #I filter for the input year. 
+       
        filter(year == input$year) %>%
+       
+       #I call ggplot and geom_density and set the x variable to respond to the user's selection. 
+       
        ggplot(aes_string(x = input$acovar, fill = '"light blue"')) +
        geom_density() +
+       
+       #I set a descriptive title and labels that react to user selections. 
+       
        labs(x = paste(filter(aco_choice_lookup, symbol==input$acovar)["name"], "in county"),
             y = "Density of Counties",
             title = paste("The distribution of MSSP beneficiaires by county in", input$year),
             caption = "Data from the Center for Medicare and Medicaid Services") +
-       theme_economist_white() +
+       
+       #I set a theme emulating the Economist. 
+       
+       theme_economist() +
+       
+       #I remove a pointless legend. 
+       
        theme(legend.position = "none") +
-       scale_fill_manual(values = "light blue")
+       
+       #I set the fill to a blue to keep the color scheme.  
+       
+       scale_fill_manual(values = "dark blue")
      
    })
    
-   #Here I create a map of the counties in the contiguous united states, filled by ACO beneficiaries.
-   #The user gets to set the year prsented and the subtitle will respond to the users selection.
-   #The other arguments set the theme and labels for clarity.  
+   #Here I create a map of the counties in the contiguous united states, filled by 
+   #the user selected measure of ACO prominence in the selected year. 
    
    output$countymap <- renderPlot({
      
+     #This naturally uses the county level dataset.
+     
      county_master %>%
+       
+       #I filter for the selected year.
+       
        filter(year == input$year) %>%
+       
+       #I fill by the user selected variable and call geom_sf to make a map.
+       
        ggplot(aes_string(fill = input$acovar)) +
        geom_sf() +
+       
+       #I set the titles, legend, and caption with reactivity to user selection.
+       
        labs(title = "Distribution of the Medicare Shared Savings Program by county",
             subtitle = paste(filter(aco_choice_lookup, symbol==input$acovar)["name"], "by county in", input$year),
             caption = "Data from the Center for Medicare and Medicaid Services",
             fill = paste(filter(aco_choice_lookup, symbol==input$acovar)["name"])) +
-       theme_economist_white() +
+       
+       #I set the theme to emulate the economist. 
+       
+       theme_economist() +
+       
+       #Finally, I remove theme elements not relevant to a map.
+       
        theme(axis.title.x=element_blank(),
              axis.text.x=element_blank(),
              axis.ticks.x=element_blank(),
@@ -553,53 +715,94 @@ server <- function(input, output) {
      
    })
    
+   #Here I make the scatterplot for county level variables.
+   #It will respond to the user's selection to fit a linear model.
+   
    output$participationPlot <- renderPlot({
      
+     #I begin with the county level master file.
+     
      g <- county_master %>%
+       
+       #I filter for the selected year.
+       
        filter(year == input$year) %>%
+       
+       #I call ggplot and set the x and y variables to respond to user selection.
+       
        ggplot(aes_string(x = input$county_x, y =input$county_y)) +
+       
+       #I call geom_point to make a scatterplot.
+       
        geom_point() +
+       
+       #I set titles and labels with responsiveness to user selections. 
+       
        labs(title = "MSSP prominence compared with other Medicare variables",
             subtitle = paste(filter(prominence_lookup, symbol==input$county_x)["name"], "vs", filter(county_lookup, symbol==input$county_y)["name"], "in", input$year),
             x = paste(filter(prominence_lookup, symbol==input$county_x)["name"]),
             y = paste(filter(county_lookup, symbol==input$county_y)["name"]),
             caption = "Data from the Center for Medicare and Medicaid Services") +
-       theme_economist_white()
+       
+       #Finally I use a theme that emulates the economist. 
+       
+       theme_economist()
+     
+     #If the user selects to fit a linear model, I add an argument to also display a the fitted line.
      
      if(input$fit2 == TRUE) {
        g + geom_smooth(method = "lm", se = TRUE)
+       
+     #Otherwise, I just display the base scatterplot. 
+       
      } else {
        g
      }
        
    })
    
+   #Here I make an HTML output for the regression table accompanying the fitter line. 
+   
    output$participation_stats <- renderUI({
+     
+     #The table will only display if the user selects to fit a line. 
      
      if(input$fit2 == TRUE) {
        
+       #I set the data to the county level dataset
+       
        data <- county_master
+       
+       #I create a flexible formula that responds to user selection.
        
        model_input <- formula(paste(input$county_y, " ~ ", input$county_x))
        
+       #Then I fit a linear model with the formula and data.
+       
        model <- lm(model_input, data)
+       
+       #I then create a formated table presenting the parameters of the model.
        
        participation_table <- tab_model(model, 
                                           pred.labels = c("Intercept", paste(filter(prominence_lookup, symbol==input$county_x)["name"])), 
                                           dv.labels = paste(filter(county_lookup, symbol==input$county_y)["name"]))
        
+       #Finally I make an HTML output to be displayed. 
+       
        HTML(participation_table$knitr)
        
+    #If the user does not select to fit a line, they will just get instructions on how. 
+       
      } else {
-       
        HTML("Check the box on the left to see a fitted linear model")
-       
      }
      
    })
 
+   #Now I create the output for the final tab, which just has background on the app. 
+   #This is just one text output. 
+   
    output$about <- renderUI({
-     
      
      about_1 <- h3(strong("App Background"))
      about_2 <- p("This app was created by Andres de Loera-Brust in the spring of 2019. He can be reached at adeloerabrust@college.harvard.edu.")
@@ -622,12 +825,11 @@ server <- function(input, output) {
                 about_7, br(),
                 about_8,
                 about_9, br()))
-     
    })
    
 }
 
-# Run the application 
+# The last line runs the application. 
 
 shinyApp(ui = ui, server = server)
 
