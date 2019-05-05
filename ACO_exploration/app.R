@@ -366,9 +366,9 @@ server <- function(input, output) {
        
        theme(legend.position = "none") + 
        
-       #I set the fill color to blue for aesthetics.
+       #I set the fill color to dark blue for aesthetics.
        
-       scale_fill_manual(values = "blue") 
+       scale_fill_manual(values = "dark blue") 
    })
    
    #Here I complete the descriptive text found on the background tab. 
@@ -591,7 +591,7 @@ server <- function(input, output) {
        
        #I call geom_violin to make a violin plot, and set alpha and fill for asthetics.
        
-       geom_violin(alpha = 0.75, fill = "blue") + 
+       geom_violin(alpha = 0.75, fill = "dark blue") + 
        
        #I set the x axis and tick labels to get appealing formating. 
        
@@ -611,7 +611,7 @@ server <- function(input, output) {
        
        #Finally I set the fill color to a blue.
        
-       scale_fill_manual(values = "blue")
+       scale_fill_manual(values = "dark blue")
      
    })
    
