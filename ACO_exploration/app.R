@@ -16,14 +16,16 @@ library(scales)
 library(tidyverse)
 library(ggthemes)
 
-#I make sure the data I need is available: 
+# I make sure the data I need is available: 
 
 aco_master <- read_rds("aco_master_file.rds") %>%
   mutate(qual_score = as.numeric(qual_score))
 
 county_master <- read_rds("county_master_file.rds")
 
-#I create a tibble with the feature choices I will use for selector inputs. 
+# Next I create tibbles with the choices I will pass to selectors. 
+# I do this to be able to later retrieve the label and the actual variable as needed.
+# That allows for flexible variable labels and titles later down the line. 
 
 feature_choices <- tibble(
   "Number of Beneficiaries" = "n_ab",
@@ -45,8 +47,7 @@ aco_choices <- tibble(
 prominence_choices <- tibble(
   "Number of ACO Beneficiaries" = "aco_benes",
   "Log Number of ACO Beneficiaries" = "log_aco_benes",
-  "ACO Participation Rate" = "aco_participation_rate"
-)
+  "ACO Participation Rate" = "aco_participation_rate")
 
 county_choices <- tibble(
   "Fee For Service Beneficiaries" = "ffs_beneficiaries",
@@ -54,10 +55,13 @@ county_choices <- tibble(
   "Medicare Advantage Participation Rate" = "ma_participation_rate",
   "Average Medicare Beneficiary Age" = "average_age",
   "Total Medicare Costs" = "total_actual_costs",
-  "Average Costs per Beneficiary" = "actual_per_capita_costs"
-)
+  "Average Costs per Beneficiary" = "actual_per_capita_costs")
 
-#I also create a way to look up the label of the variables so I can have reactive labels 
+state_choices <- tibble(
+  "Entered" = "entered",
+  "Exit" = "exit")
+
+#I also create a way to look up the label of the variables so I can have reactive labels.
 
 feature_lookup <- 
   feature_choices %>% 
@@ -72,12 +76,16 @@ prominence_lookup <- prominence_choices %>%
 county_lookup <- county_choices %>%
   gather(name, symbol)
 
+state_lookup <- state_choices %>%
+  gather(name, symbol)
+
+
 # Define UI for application
-#The first argument defines the theme for the app, which I chose to be "spacelab" 
+# The first argument defines the theme for the app, which I chose to be "spacelab" 
 
 ui <- fluidPage(theme = shinytheme("spacelab"),
   
-   # I set the pplication title
+   # I set the application title
   
    titlePanel("Exploring the Medicare Shared Savings Program"),
    
@@ -87,7 +95,7 @@ ui <- fluidPage(theme = shinytheme("spacelab"),
    sidebarLayout(
       sidebarPanel(
         
-        #On the background panel I only add a selector for year.
+        #On the background panel I add a selector for year and a selector for ACO level variable. 
         
         conditionalPanel(
           condition = "input.tabs == 'Background'",
@@ -97,10 +105,18 @@ ui <- fluidPage(theme = shinytheme("spacelab"),
                       choices = c(2014, 2015, 2016, 2017),
                       selected = 2017,
                       multiple = FALSE,
-                      selectize = TRUE)
+                      selectize = TRUE),
+          
+          selectInput("orgvar",
+                      "Select an ACO Variable",
+                      choices = feature_choices,
+                      selected = "bnchmk_min_exp")
+          
         ),
         
-        #On the county variation panel I again only add a selector for year. 
+        # On the county variation panel I add a selector for year, ACO related county variable to map,
+        # ACO county variable for a scatter plot, other county variable for a scatter plot, 
+        # And the option to fit a linear model. 
         
         conditionalPanel(
           condition = "input.tabs == 'County Variation'",
@@ -113,7 +129,7 @@ ui <- fluidPage(theme = shinytheme("spacelab"),
                     selectize = TRUE),
           
           selectInput("acovar",
-                      "Select a variable to map",
+                      "Select a variable to graph and map",
                       choices = aco_choices, 
                       selected = "log_aco_benes"),
           
@@ -158,6 +174,11 @@ ui <- fluidPage(theme = shinytheme("spacelab"),
         
          conditionalPanel(
            condition = "input.tabs == 'Entrance and Exit'",
+           
+           selectInput("statevar",
+                       "Select entry or exit",
+                       choices = state_choices,
+                       selected = "entered"),
           
            selectInput("violinvar",
                     "Select a variable to compare on",
@@ -166,6 +187,7 @@ ui <- fluidPage(theme = shinytheme("spacelab"),
         )),
       
       # The main panel will have several tabs.
+      
       mainPanel(
         
         tabsetPanel(id = "tabs",
@@ -180,44 +202,59 @@ ui <- fluidPage(theme = shinytheme("spacelab"),
                              
                              htmlOutput("description1"), 
                              
-                             plotOutput("saveplot"),
+                             plotOutput("flexplot"),
                              
                              htmlOutput("description2")),
       
       # The next tab will present the relationship between various organizational variables. 
+      # That will take the form of a very flexible scatterplot with the option to fit a linear model.
+      # And naturally I add descriptive text. 
       
                     tabPanel("Program Features", 
+                             
+                             htmlOutput("features"),
                              
                              plotOutput("scatterfeatures"),
                              
                              htmlOutput("program_feature_stats")), 
+          
+      # The next tab will discuss entrance and exit in the MSSP program 
+      # and compare program features on that axis. Ill do that will bar charts and violin plots.
+      # I also add text to describe the panel. 
+      
+                    tabPanel("Entrance and Exit", 
+                             
+                             htmlOutput("entryexit"),
+                             
+                             plotOutput("bars"), 
+                             
+                             plotOutput("violin")),
       
       # The next tab will focus on variation at the county level with some plots and maps. 
-      # This is where selecting program year will be relevant. 
+      # I also add text between the plots and data.  
       
                     tabPanel("County Variation",
                              
-                             plotOutput("distPlot"), 
+                             htmlOutput("participation1"),
                              
-                             plotOutput("penePlot"),
+                             plotOutput("distPlot"),
                              
                              plotOutput("countymap"),
+                             
+                             htmlOutput("participation2"),
                              
                              plotOutput("participationPlot"),
                              
                              htmlOutput("participation_stats")),
       
-      # The next tab will discuss entrance and exit in the MSSP program 
-      # and compare program features on that axis.
+      #The last tab will have generic background information on the app, like links to data and code
+      #as well as my contact information. 
       
-                    tabPanel("Entrance and Exit", 
-                             plotOutput("enterbars"), 
+                    tabPanel("About",
                              
-                             plotOutput("enterviolin"),
-                             
-                             plotOutput("exitbars"),
-                             
-                             plotOutput("exitviolin"))
+                             htmlOutput("about"))
+      
+
         )
       )
    )
@@ -267,15 +304,15 @@ server <- function(input, output) {
      
    })
    
-   output$saveplot <- renderPlot({
+   output$flexplot <- renderPlot({
      
      aco_master %>%
        filter(year == input$year_1) %>%
-       ggplot(aes(x = gen_save_loss, fill = "blue")) +
+       ggplot(aes_string(x = input$orgvar, fill = '"blue"')) +
        geom_density(alpha = 0.5) +
-       labs(x = "Savings/Losses Generated",
+       labs(x = paste(filter(feature_lookup, symbol==input$orgvar)["name"]),
             y = "Density of ACOs",
-            title = paste("Savings and Losses Generated in the MSSP in", input$year_1),
+            title = paste(filter(feature_lookup, symbol==input$orgvar)["name"], "for MSSP ACOs in", input$year_1),
             caption = "Data from the Center for Medicare and Medicaid Services") +
        theme_economist_white() +
        theme(legend.position = "none") + 
@@ -386,7 +423,7 @@ server <- function(input, output) {
      
    })
    
-   #Here I make a density plot of beneficiaries per county. 
+   #Here I make a density plot of ACO prominence measures by county. 
    #I set the axes deliberately to get an appealing and interpretable chart. 
    #I also set the labels, color and theme for asthetic appeal. 
    
@@ -394,13 +431,9 @@ server <- function(input, output) {
      
      county_master %>%
        filter(year == input$year) %>%
-       ggplot(aes(x = aco_benes, fill = "light blue")) +
+       ggplot(aes_string(x = input$acovar, fill = '"light blue"')) +
        geom_density() +
-       scale_x_log10(breaks = c(10, 100, 1000, 10000, 100000, 1000000), 
-                     labels = c("10", "100", "1,000", "10,000", "100,000", "1,000,000")) +
-       scale_y_continuous(breaks = c(0.0, 0.1, 0.2, 0.3, 0.4, 0.5),
-                          labels = c("0.0", "0.1", "0.2", "0.3", "0.4", "0.5")) +
-       labs(x = "ACO beneficiaries in county (Log base 10)",
+       labs(x = paste(filter(aco_choice_lookup, symbol==input$acovar)["name"], "in county"),
             y = "Density of Counties",
             title = paste("The distribution of MSSP beneficiaires by county in", input$year),
             caption = "Data from the Center for Medicare and Medicaid Services") +
@@ -410,23 +443,6 @@ server <- function(input, output) {
      
    })
    
-   #Here I make a plot showing the distribution of counties based on their ACO participation rate. 
-   
-   output$penePlot <- renderPlot({
-     
-     county_master %>%
-       filter(year == input$year) %>%
-       ggplot(aes(x = aco_participation_rate, fill = "light blue")) +
-       geom_density() +
-       labs(x = "ACO participation rate in county",
-            y = "Density of Counties",
-            title = paste("The distribution of MSSP participation rates by county in", input$year),
-            caption = "Data from the Center for Medicare and Medicaid Services") +
-       theme_economist_white() +
-       theme(legend.position = "none") +
-       scale_fill_manual(values = "dark blue")
-     
-   })
    
    #Here I create a map of the counties in the contiguous united states, filled by ACO beneficiaries.
    #The user gets to set the year prsented and the subtitle will respond to the users selection.
@@ -497,79 +513,42 @@ server <- function(input, output) {
      
    })
    
-   #Here I make a bar chart of program entrances by year.
+   #Here I make a bar chart of program entrances or exits by year.
    
-   output$enterbars <- renderPlot({
+   output$bars <- renderPlot({
      
      aco_master %>%
-     filter(entered == 1) %>%
+     filter(eval(parse(text=input$statevar)) == 1) %>%
      ggplot(aes(x = year, fill = "blue")) +
      geom_bar() +
      labs(x = "Year",
-          y = "Number of ACOs that Entered",
-          title = "MSSP Entrance by Year",
+          y = paste("Number of ACOs that", filter(state_lookup, symbol==input$statevar)["name"]),
+          title = "MSSP Churn by Year",
           caption = "Data from the Center for Medicare and Medicaid Services") +
      theme_economist_white() +
      theme(legend.position = "none") +
-     scale_fill_manual(values = "dark green")
+     scale_fill_manual(values = "light blue")
      
    })
    
    #Here I make a reactive violin plot where the variable of analysis is selected by the user.
-   #It compares newly entered ACOs to ACOs that have been in the program longer than a year. 
    
-   output$enterviolin <- renderPlot({
+   output$violin <- renderPlot({
      
      aco_master %>%
-       ggplot(aes_string(y = input$violinvar, group = "entered", x = "entered")) +
-       geom_violin(alpha = 0.25, fill = "green") + 
+       ggplot(aes_string(y = input$violinvar, group = input$statevar, x = input$statevar)) +
+       geom_violin(alpha = 0.25, fill = "blue") + 
        scale_x_continuous(breaks = c(0, 1),
-                          labels = c("Continuing", "Entering")) +
+                          labels = c("Continuing", paste(filter(state_lookup, symbol==input$statevar)["name"]))) +
        labs(x = element_blank(),
             y = paste(filter(feature_lookup, symbol==input$violinvar)["name"]),
-            title = "Organization features vary by continuing or entering status",
+            title = "Organization features vary by continuing, exiting or entering status",
             caption = "Data from the Center for Medicare and Medicaid Services") +
        theme_economist_white() +
-       scale_fill_manual(values = "green")
+       scale_fill_manual(values = "dark blue")
      
    })
-   
-   #Here I make a bar chart of program exits by year. 
-   
-   output$exitbars <- renderPlot({
-     
-     aco_master %>%
-       filter(exit == 1) %>%
-       ggplot(aes(x = year, fill = "blue")) +
-       geom_bar() +
-       labs(x = "Year",
-            y = "Number of ACOs that Exited",
-            title = "MSSP Exit by Year",
-            caption = "Data from the Center for Medicare and Medicaid Services") +
-       theme_economist_white() +
-       theme(legend.position = "none") +
-       scale_fill_manual(values = "red")
-    
-   })
-   
-   #Here I make a reactive violin plot where the variable of analysis is selected by the user.
-   #It compares ACOs that exit in a given year to those that dont.  
-   
-   output$exitviolin <- renderPlot({
-     
-     aco_master %>%
-       ggplot(aes_string(y = input$violinvar, group = "exit", x = "exit")) +
-       geom_violin(alpha = 0.25, fill = "red")+
-       scale_x_continuous(breaks = c(0, 1),
-                          labels = c("Continuing", "Exiting")) +
-       labs(x = element_blank(),
-            y = paste(filter(feature_lookup, symbol==input$violinvar)["name"]),
-            title = "Organization features vary by continuing or exiting status",
-            caption = "Data from the Center for Medicare and Medicaid Services") +
-       theme_economist_white() +
-       scale_fill_manual(values = "red")
-     
-   })
+
    
    
 }
