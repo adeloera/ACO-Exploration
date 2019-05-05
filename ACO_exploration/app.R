@@ -183,7 +183,7 @@ ui <- fluidPage(theme = shinytheme("spacelab"),
            selectInput("violinvar",
                     "Select a variable to compare on",
                     choices = feature_choices,
-                    selected = "earn_save_loss")
+                    selected = "qual_score")
         )),
       
       # The main panel will have several tabs.
@@ -347,6 +347,38 @@ server <- function(input, output) {
                 about13,
                 about14, br()
                 ))
+     
+   })
+   
+   output$features <- renderUI({
+     
+     features1 <- h3(strong("The Relationship Between Organizational Variables"))
+     features2 <- p("This tab allows the user to compare how organizational variables relate to each other within the MSSP. The unit of observation is one year for one ACO. Using the tab on the left, you can select with variables appear on the X and Y axes of the scatterplot below, as well as whether to fit a linear model. The variables are defined as follows:")
+     features3 <- p(strong("Number of Beneficiaries"), "refers to the number of Medicare beneficiaries assigned to the ACO in that year and used to calculate the benchmark.")
+     features4 <- p(strong("Total Benchmark"), "refers to the total monetary cost Medicare has allocated for an ACO in a given year. Should the ACO spend less than that amount, it gets to keep a proportion equal to its shared savings rate. Otherwise it may (or may not) bear some losses. ")
+     features5 <- p(strong("Per Capita Benchmark"), "is the Total Benchmark divided by Number of Beneficiaries, to arrive at the average cost Medicare has allocated for an ACO for each assigned person in a given year.")
+     features6 <- p(strong("Total Expenditures"), "refers to the total monetary expenditures of an ACO attributed to their Medicare beneficiary population in the given year. ")
+     features7 <- p(strong("Per Capita Expenditures"), "is the Total Expenditures divided by the Number of Beneficiaries, to arrive at the average cost the ACO incurred for each assigned person in a given year. ")
+     features8 <- p(strong("Savings/Losses Generated"), "is the result of subtracting Total Expenditures from the Total Benchmark, to arrive at the total monetary amount the ACO saved or lost relative to their benchmark in a given year.")
+     features9 <- p(strong("Savings/Loss Rate"), "is the proportion of Total Benchmark that was saved or lost in the given year.")
+     features10 <- p(strong("Shared Savings Rate"), "refers to the proportion of Savings/Losses Generated that are kept (or lost) by the ACO in a given year.")
+     features11 <- p(strong("Savings Earned"), "refers to the monetary amount of savings kept by the ACO in the given year. ")
+     features12 <- p(strong("Quality Score"), "is a single numeric measure of quality of care received by Medicare beneficiaries at an ACO in the given year. ")
+     features13 <- p(strong("Length of Service"), "refers to the number of days (as of the last day of a given year) since an ACO began its first agreement to participate in the MSSP. ")
+     
+     HTML(paste(features1,
+                features2,
+                features3,
+                features4,
+                features5,
+                features6,
+                features7,
+                features8,
+                features9,
+                features10,
+                features11,
+                features12,
+                features13))
      
    })
    
